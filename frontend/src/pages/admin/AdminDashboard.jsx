@@ -1713,9 +1713,9 @@ export default function AdminDashboard() {
               <div style={{
                 width: 32, height: 32, borderRadius: 9, background: "linear-gradient(135deg,#8B5CF6,#F43F8E)",
                 display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 800, flexShrink: 0,
-              }}>{user.avatar}</div>
+              }}>{user?.avatar || (user?.username || user?.name || "A")[0].toUpperCase()}</div>
               <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 12, fontWeight: 600, color: C.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user.name}</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: C.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user?.username || user?.name || "Admin User"}</div>
                 <div style={{ fontSize: 10, color: C.muted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user.email}</div>
               </div>
             </div>
