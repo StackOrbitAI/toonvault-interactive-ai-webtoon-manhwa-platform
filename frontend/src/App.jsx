@@ -6,6 +6,7 @@ import Reader from './components/Reader';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import Login from './components/Login';
 import ToonVaultUserDashboard from './components/ToonVaultUserDashboard';
+import Pricing from './components/Pricing';
 import './App.css';
 
 // Simple Protected Route
@@ -34,6 +35,9 @@ function App() {
         <Routes>
           {/* Home Page */}
           <Route path="/" element={<ToonVaultHome />} />
+          
+          {/* Pricing */}
+          <Route path="/pricing" element={<Pricing />} />
           
           {/* Public Reader */}
           <Route path="/story/:storyId" element={<Reader />} />

@@ -331,6 +331,7 @@ export default function ToonVaultHome() {
               { label: "Categories", target: "#categories" },
               { label: "Rankings", target: "#rankings" },
               { label: "Canvas", target: "#collections" },
+              { label: "Pricing", path: "/pricing" },
               { label: "Creators 101", target: "#creators" }
             ].map(item => (
               <button key={item.label} onClick={() => handleNav(item)} style={{
@@ -351,7 +352,10 @@ export default function ToonVaultHome() {
                   <input
                     autoFocus
                     value={searchVal}
-                    onChange={e => setSearchVal(e.target.value)}
+                    onChange={e => {
+                      setSearchVal(e.target.value);
+                      if (!searchOpen) setSearchOpen(true);
+                    }}
                     placeholder="Search stories, genres..."
                     style={{
                       padding: "10px 40px 10px 16px", borderRadius: 24, border: `2px solid ${COLORS.plum}`,
@@ -394,9 +398,6 @@ export default function ToonVaultHome() {
                           No stories found for "{searchVal}" 🔍
                         </div>
                       )}
-                      <div style={{ padding: "10px", textAlign: "center", background: COLORS.cardTint, fontSize: 12, fontWeight: 600, color: COLORS.plum, cursor: "pointer" }}>
-                        View all results →
-                      </div>
                     </div>
                   )}
                 </div>
@@ -469,7 +470,11 @@ export default function ToonVaultHome() {
               <p style={{ fontSize: 16, color: "rgba(255,255,255,0.82)", margin: "0 0 8px", lineHeight: 1.6 }}>{featured.subtitle}</p>
               <p style={{ fontSize: 13, color: "rgba(255,255,255,0.55)", margin: "0 0 28px" }}>{featured.genre}</p>
               <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-                <button style={{
+                <button onClick={() => {
+                  const story = liveStories.find(s => s.title === featured.title);
+                  if (story) navigate(`/story/${story.id}`);
+                  else navigate(`/story/1`);
+                }} style={{
                   padding: "12px 28px", background: "white", color: COLORS.plum,
                   border: "none", borderRadius: 24, fontSize: 14, fontWeight: 700, cursor: "pointer",
                 }}>▶ Start reading</button>
@@ -807,7 +812,7 @@ export default function ToonVaultHome() {
               <p style={{ fontSize: 13, lineHeight: 1.7, maxWidth: 200 }}>An AI-powered interactive storytelling platform where choices shape every story.</p>
             </div>
             {[
-              { title: "Discover", links: ["Originals", "Categories", "Rankings", "New releases", "Canvas"] },
+              { title: "Discover", links: ["Originals", "Categories", "Rankings", "New releases", "Canvas", "Pricing"] },
               { title: "Create", links: ["Publish a story", "Creators 101", "Team features", "Creator tools", "Earnings"] },
               { title: "Company", links: ["About", "Help center", "Community", "Terms", "Privacy"] },
             ].map(col => (
@@ -823,7 +828,8 @@ export default function ToonVaultHome() {
                         "Canvas": "#collections",
                         "Creators 101": "#creators"
                       };
-                      handleNav({ target: mapping[l], path: l === "Pricing" ? "/pricing" : null });
+                      if (l === "Pricing") navigate("/pricing");
+                      else handleNav({ target: mapping[l] });
                     }}
                     style={{ fontSize: 13, marginBottom: 9, cursor: "pointer" }}
                     onMouseEnter={e => e.currentTarget.style.color = "white"}
