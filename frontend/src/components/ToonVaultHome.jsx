@@ -356,14 +356,29 @@ export default function ToonVaultHome() {
                       setSearchVal(e.target.value);
                       if (!searchOpen) setSearchOpen(true);
                     }}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' && searchResults.length > 0) {
+                        navigate(`/story/${searchResults[0].id}`);
+                        setSearchOpen(false);
+                      }
+                    }}
                     placeholder="Search stories, genres..."
                     style={{
-                      padding: "10px 40px 10px 16px", borderRadius: 24, border: `2px solid ${COLORS.plum}`,
+                      padding: "10px 80px 10px 16px", borderRadius: 24, border: `2px solid ${COLORS.plum}`,
                       background: COLORS.card, fontSize: 14, color: COLORS.ink, outline: "none", width: 280,
                       boxShadow: "0 4px 12px rgba(109,74,232,0.15)", transition: "all 0.3s",
                     }}
                   />
-                  <span style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", fontSize: 16 }}>🔍</span>
+                  <button 
+                    onClick={() => {
+                      if (searchResults.length > 0) navigate(`/story/${searchResults[0].id}`);
+                    }}
+                    style={{ 
+                      position: "absolute", right: 4, top: "50%", transform: "translateY(-50%)", 
+                      fontSize: 12, background: COLORS.plum, color: "white", border: "none", 
+                      borderRadius: 18, padding: "6px 12px", fontWeight: 700, cursor: "pointer"
+                    }}
+                  >Search</button>
                   
                   {/* LIVE SEARCH DROPDOWN */}
                   {searchVal && (
@@ -801,22 +816,15 @@ export default function ToonVaultHome() {
                     </div>
                   ))}
                 </div>
-                <button onClick={() => navigate('/user')} style={{
-                  width: "100%", padding: "14px", borderRadius: 14, border: "none",
-                  background: plan.popular ? plan.accent : "white",
-                  color: plan.popular ? "white" : plan.accent,
-                  border: `1.5px solid ${plan.accent}`,
-                  fontSize: 14, fontWeight: 700, cursor: "pointer",
-                  transition: "all 0.2s"
-                }}
-                onMouseEnter={e => {
-                  if (plan.popular) e.currentTarget.style.background = COLORS.plumDark;
-                  else e.currentTarget.style.background = `${plan.accent}10`;
-                }}
-                onMouseLeave={e => {
-                  if (plan.popular) e.currentTarget.style.background = plan.accent;
-                  else e.currentTarget.style.background = "white";
-                }}
+                <button 
+                  onClick={() => navigate('/user')}
+                  style={{
+                    width: "100%", padding: "14px", borderRadius: 14, border: "none",
+                    background: plan.popular ? plan.accent : "white",
+                    color: plan.popular ? "white" : plan.accent,
+                    border: `1.5px solid ${plan.accent}`,
+                    fontSize: 14, fontWeight: 700, cursor: "pointer"
+                  }}
                 >
                   {plan.price === "0" ? "Start Free" : "Upgrade Now"}
                 </button>
