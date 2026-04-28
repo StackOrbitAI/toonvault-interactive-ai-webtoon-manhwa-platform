@@ -112,6 +112,7 @@ export default function ToonVaultUserDashboard() {
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [settings, setSettings] = useState({ site_name: "ToonVault", maintenance_mode: "false" });
   const [loading, setLoading] = useState(true);
 
   // Wizards
@@ -122,6 +123,11 @@ export default function ToonVaultUserDashboard() {
   const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
+    // Fetch Settings
+    import('axios').then(({ default: axios }) => {
+      axios.get('/api/settings/public').then(r => setSettings(prev => ({ ...prev, ...r.data })));
+    });
+
     const fetchUser = async () => {
       try {
         const token = localStorage.getItem('token');
@@ -194,13 +200,31 @@ export default function ToonVaultUserDashboard() {
 
   return (
     <div style={{ fontFamily: "'Inter', sans-serif", background: COLORS.bg, minHeight: "100vh", color: COLORS.ink }}>
-      <Helmet><title>Dashboard | ToonVault</title></Helmet>
+      <Helmet><title>{settings.site_name} Dashboard</title></Helmet>
+
+      {/* ── MAINTENANCE OVERLAY ── */}
+      {settings.maintenance_mode === 'true' && (
+        <div style={{
+          position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+          background: COLORS.bg, color: "white", zIndex: 10000,
+          display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: 20
+        }}>
+          <div style={{ fontSize: 60, marginBottom: 20 }}>🏗️</div>
+          <h1 style={{ fontSize: 32, fontWeight: 900, marginBottom: 12 }}>Under Maintenance</h1>
+          <p style={{ fontSize: 16, color: "rgba(255,255,255,0.6)", maxWidth: 500 }}>
+            {settings.site_name} is currently undergoing scheduled maintenance. We'll be back shortly!
+          </p>
+          <button onClick={() => { localStorage.removeItem("user"); localStorage.removeItem("token"); navigate("/"); }} style={{ marginTop: 24, padding: "10px 24px", background: COLORS.plum, border: "none", borderRadius: 12, color: "white", fontWeight: 700, cursor: "pointer" }}>Go Home</button>
+        </div>
+      )}
 
       <nav style={{ position: "sticky", top: 0, zIndex: 200, background: `${COLORS.card}E6`, backdropFilter: "blur(12px)", borderBottom: `1px solid ${COLORS.border}` }}>
         <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 24px", height: 62, display: "flex", alignItems: "center" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }} onClick={() => navigate("/")}>
-            <div style={{ width: 32, height: 32, borderRadius: 10, background: `linear-gradient(135deg, ${COLORS.plum}, ${COLORS.rose})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>📖</div>
-            <span style={{ fontSize: 19, fontWeight: 800, color: COLORS.plum }}>Toon<span style={{ color: COLORS.rose }}>Vault</span></span>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }} onClick={() => navigate("/")}>
+            <div style={{ width: 32, height: 32, borderRadius: 10, background: `linear-gradient(135deg, ${COLORS.plum}, ${COLORS.rose})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, boxShadow: "0 4px 12px rgba(139, 92, 246, 0.3)" }}>📖</div>
+            <span style={{ fontSize: 20, fontWeight: 800, color: COLORS.ink, letterSpacing: -0.5 }}>
+              {settings.site_name.split('Vault')[0]}<span style={{ color: COLORS.rose }}>{settings.site_name.includes('Vault') ? 'Vault' : ''}</span>
+            </span>
           </div>
           <div style={{ flex: 1 }} />
           <div style={{ display: "flex", gap: 12, alignItems: "center" }}>

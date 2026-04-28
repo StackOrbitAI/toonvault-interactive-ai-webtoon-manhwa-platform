@@ -215,6 +215,12 @@ export default function ToonVaultHome() {
   const [searchResults, setSearchResults] = useState([]);
   const [liveStories, setLiveStories] = useState(STORIES);
   const [showPopup, setShowPopup] = useState(false);
+  const [settings, setSettings] = useState({
+    site_name: "ToonVault",
+    maintenance_mode: "false",
+    free_episode_interval_hrs: "3",
+    show_creator_popup: "true"
+  });
   const searchRef = useRef(null);
   const genreScrollRef = useRef();
 
@@ -223,9 +229,10 @@ export default function ToonVaultHome() {
   };
 
   useEffect(() => {
-    // Check if popup should be shown based on admin setting
+    // Fetch all public settings
     axios.get('/api/settings/public')
       .then(r => {
+        setSettings(prev => ({ ...prev, ...r.data }));
         if (r.data.show_creator_popup === 'true') {
            setTimeout(() => setShowPopup(true), 2500);
         }
@@ -319,9 +326,11 @@ export default function ToonVaultHome() {
       }}>
         <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 24px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
-              <div style={{ width: 32, height: 32, borderRadius: 10, background: `linear-gradient(135deg, ${COLORS.plum}, ${COLORS.rose})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>📖</div>
-              <span style={{ fontSize: 20, fontWeight: 800, color: COLORS.plum, letterSpacing: -0.5 }}>Toon<span style={{ color: COLORS.rose }}>Vault</span></span>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }} onClick={() => navigate("/")}>
+              <div style={{ width: 34, height: 34, borderRadius: 10, background: `linear-gradient(135deg, ${COLORS.plum}, ${COLORS.rose})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, boxShadow: "0 4px 12px rgba(109,74,232,0.2)" }}>📖</div>
+              <span style={{ fontSize: 22, fontWeight: 800, color: COLORS.ink, letterSpacing: -0.5 }}>
+                {settings.site_name.split('Vault')[0]}<span style={{ color: COLORS.rose }}>{settings.site_name.includes('Vault') ? 'Vault' : ''}</span>
+              </span>
             </div>
           </div>
 
@@ -718,7 +727,7 @@ export default function ToonVaultHome() {
           }}>
             <div>
               <div style={{ fontSize: 24, marginBottom: 6 }}>⏰</div>
-              <h3 style={{ fontSize: 18, fontWeight: 700, color: COLORS.ink, margin: "0 0 6px" }}>Free every 3 hours!</h3>
+              <h3 style={{ fontSize: 18, fontWeight: 700, color: COLORS.ink, margin: "0 0 6px" }}>Free every {settings.free_episode_interval_hrs} hours!</h3>
               <p style={{ fontSize: 14, color: COLORS.muted, margin: 0, maxWidth: 380 }}>New episodes unlock automatically. Follow your favorites and never miss an update — no coins needed.</p>
             </div>
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
@@ -835,6 +844,21 @@ export default function ToonVaultHome() {
 
       </div>
 
+      {/* ── MAINTENANCE OVERLAY ── */}
+      {settings.maintenance_mode === 'true' && (
+        <div style={{
+          position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+          background: COLORS.ink, color: "white", zIndex: 10000,
+          display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: 20
+        }}>
+          <div style={{ fontSize: 60, marginBottom: 20 }}>🏗️</div>
+          <h1 style={{ fontSize: 32, fontWeight: 900, marginBottom: 12 }}>Under Maintenance</h1>
+          <p style={{ fontSize: 16, color: "rgba(255,255,255,0.6)", maxWidth: 500 }}>
+            {settings.site_name} is currently undergoing scheduled maintenance. We'll be back shortly with even better stories!
+          </p>
+        </div>
+      )}
+
       {/* ═══ FOOTER ═══ */}
       <footer style={{
         background: COLORS.ink, color: "rgba(255,255,255,0.6)",
@@ -845,7 +869,7 @@ export default function ToonVaultHome() {
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
                 <div style={{ width: 28, height: 28, borderRadius: 8, background: `linear-gradient(135deg, ${COLORS.plum}, ${COLORS.rose})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>📖</div>
-                <span style={{ fontSize: 18, fontWeight: 800, color: "white" }}>ToonVault</span>
+                <span style={{ fontSize: 18, fontWeight: 800, color: "white" }}>{settings.site_name}</span>
               </div>
               <p style={{ fontSize: 13, lineHeight: 1.7, maxWidth: 200 }}>An AI-powered interactive storytelling platform where choices shape every story.</p>
             </div>
@@ -878,7 +902,7 @@ export default function ToonVaultHome() {
             ))}
           </div>
           <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: 20, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
-            <div style={{ fontSize: 12 }}>© 2026 ToonVault. All rights reserved.</div>
+            <div style={{ fontSize: 12 }}>© 2026 {settings.site_name}. All rights reserved.</div>
             <div style={{ display: "flex", gap: 14 }}>
               {["Discord", "Instagram", "Twitter", "YouTube"].map(s => (
                 <span key={s} style={{ fontSize: 12, cursor: "pointer" }}

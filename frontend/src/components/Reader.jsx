@@ -15,6 +15,7 @@ function Reader() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({});
   const [wallet, setWallet] = useState(null);
+  const [settings, setSettings] = useState({ site_name: "ToonVault", maintenance_mode: "false" });
 
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-200, 0, 200], [-25, 0, 25]);
@@ -26,6 +27,9 @@ function Reader() {
     fetchStartNode();
     fetchWallet();
     
+    // Fetch Settings
+    axios.get('/api/settings/public').then(r => setSettings(prev => ({ ...prev, ...r.data })));
+
     socket.on('stat_update', ({ linkId, newStats }) => {
       setStats(prev => ({ ...prev, [linkId]: newStats }));
     });
@@ -90,7 +94,7 @@ function Reader() {
       <header className="reader-nav">
         <div className="brand" onClick={() => navigate('/')}>
           <Sparkles className="brand-icon" size={24} />
-          <h1>Toonvault</h1>
+          <h1>{settings.site_name}</h1>
         </div>
         <div className="nav-actions">
            <button onClick={() => navigate('/user')} className="p-2 glass-morphism rounded-full">
@@ -137,6 +141,21 @@ function Reader() {
           )}
         </AnimatePresence>
       </main>
+      {/* ── MAINTENANCE OVERLAY ── */}
+      {settings.maintenance_mode === 'true' && (
+        <div style={{
+          position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+          background: "#0A0910", color: "white", zIndex: 10000,
+          display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: 20
+        }}>
+          <div style={{ fontSize: 60, marginBottom: 20 }}>🏗️</div>
+          <h1 style={{ fontSize: 32, fontWeight: 900, marginBottom: 12 }}>Under Maintenance</h1>
+          <p style={{ fontSize: 16, color: "rgba(255,255,255,0.6)", maxWidth: 500 }}>
+            {settings.site_name} is currently undergoing scheduled maintenance. We'll be back shortly!
+          </p>
+          <button onClick={() => navigate("/")} style={{ marginTop: 24, padding: "10px 24px", background: "#8B5CF6", border: "none", borderRadius: 12, color: "white", fontWeight: 700, cursor: "pointer" }}>Go Home</button>
+        </div>
+      )}
     </div>
   );
 }

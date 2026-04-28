@@ -44,7 +44,7 @@ app.use('/api/admin', require('./routes/admin'));
 // Public Settings
 app.get('/api/settings/public', async (req, res) => {
     try {
-        const settings = await Setting.find({ key: { $in: ['show_creator_popup', 'site_name', 'maintenance_mode'] } });
+        const settings = await Setting.find({ key: { $in: ['show_creator_popup', 'site_name', 'maintenance_mode', 'payment_paypal_enabled', 'payment_stripe_enabled'] } });
         const config = {};
         settings.forEach(s => config[s.key] = s.value);
         res.json(config);

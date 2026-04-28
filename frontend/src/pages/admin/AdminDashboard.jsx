@@ -1426,6 +1426,31 @@ function SettingsPage({ user, onLogout }) {
           <Toggle label="Email Notifications" checked={true} onChange={() => {}} />
         </div>
 
+        {/* Payment Gateways */}
+        <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 16, padding: "22px" }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: C.text, marginBottom: 18 }}>💳 Payment Gateways</div>
+          <div style={{ background: C.surface2, padding: "12px 16px", borderRadius: 12, border: `1px solid ${C.border}`, marginBottom: 16 }}>
+            <Toggle 
+              label="Enable PayPal Checkout" 
+              checked={getVal('payment_paypal_enabled') === 'true'} 
+              onChange={v => updateSetting('payment_paypal_enabled', v.toString())} 
+            />
+            <div style={{ fontSize: 11, color: C.muted, marginTop: 4 }}>
+              When enabled, users can select PayPal during signup and membership upgrades.
+            </div>
+          </div>
+          <div style={{ background: C.surface2, padding: "12px 16px", borderRadius: 12, border: `1px solid ${C.border}` }}>
+            <Toggle 
+              label="Enable Stripe Payments" 
+              checked={getVal('payment_stripe_enabled') === 'true'} 
+              onChange={v => updateSetting('payment_stripe_enabled', v.toString())} 
+            />
+            <div style={{ fontSize: 11, color: C.muted, marginTop: 4 }}>
+              Allows credit card payments via Stripe. (Configuration required in backend)
+            </div>
+          </div>
+        </div>
+
         {/* Admin Profile */}
         <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 16, padding: "22px" }}>
           <div style={{ fontSize: 14, fontWeight: 700, color: C.text, marginBottom: 18 }}>👤 Admin Profile</div>

@@ -3,12 +3,15 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Sparkles, User, Lock, Mail, Phone, MapPin, CreditCard, ShieldCheck, Check } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import axios from 'axios';
+import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
 export default function Login({ type = 'user' }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [isRegister, setIsRegister] = useState(false);
   const [step, setStep] = useState(1); // 1: Auth, 2: Address, 3: Payment
+  const [paypalEnabled, setPaypalEnabled] = useState(true);
+  const [settings, setSettings] = useState({ site_name: "ToonVault" });
   const [formData, setFormData] = useState({
     username: '', email: '', password: '',
     plan: 'Free',
@@ -26,10 +29,18 @@ export default function Login({ type = 'user' }) {
       setFormData(prev => ({ ...prev, plan: planParam }));
       setIsRegister(true);
     }
+
+    // Fetch payment settings
+    axios.get('/api/settings/public')
+      .then(res => {
+        setPaypalEnabled(res.data.payment_paypal_enabled === 'true');
+        setSettings(prev => ({ ...prev, ...res.data }));
+      })
+      .catch(() => setPaypalEnabled(true));
   }, [location]);
 
   const isAdmin = type === 'admin';
-  const title = isAdmin ? 'Admin Login — ToonVault' : isRegister ? 'Join ToonVault — Membership' : 'Sign In — ToonVault';
+  const title = isAdmin ? `Admin Login — ${settings.site_name}` : isRegister ? `Join ${settings.site_name} — Membership` : `Sign In — ${settings.site_name}`;
 
   const PLANS = [
     { name: 'Free', price: '0', color: '#6B7280' },
@@ -84,7 +95,9 @@ export default function Login({ type = 'user' }) {
       <header style={{ padding: '16px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(10px)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }} onClick={() => navigate('/')}>
           <div style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(135deg, #8B5CF6, #F43F8E)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>📖</div>
-          <span style={{ fontSize: 18, fontWeight: 800 }}>Toon<span style={{ color: '#F43F8E' }}>Vault</span></span>
+          <span style={{ fontSize: 18, fontWeight: 800 }}>
+            {settings.site_name.split('Vault')[0]}<span style={{ color: '#F43F8E' }}>{settings.site_name.includes('Vault') ? 'Vault' : ''}</span>
+          </span>
         </div>
       </header>
 
@@ -175,20 +188,38 @@ export default function Login({ type = 'user' }) {
                 </div>
                 
                 {formData.plan !== 'Free' ? (
-                  <>
-                    <div style={{ position: 'relative' }}>
-                      <CreditCard size={18} style={iconStyle} />
-                      <input type="text" placeholder="Card Number (0000 0000 0000 0000)" value={formData.billing.cardNumber} required style={inputStyle} onChange={e => setFormData({ ...formData, billing: { ...formData.billing, cardNumber: e.target.value } })} />
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                      <input type="text" placeholder="MM/YY" value={formData.billing.expiry} required style={{ ...inputStyle, paddingLeft: 16 }} onChange={e => setFormData({ ...formData, billing: { ...formData.billing, expiry: e.target.value } })} />
-                      <input type="password" placeholder="CVV" value={formData.billing.cvv} required style={{ ...inputStyle, paddingLeft: 16 }} onChange={e => setFormData({ ...formData, billing: { ...formData.billing, cvv: e.target.value } })} />
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0 4px', opacity: 0.6 }}>
+                  <div style={{ marginTop: 10 }}>
+                    {paypalEnabled ? (
+                      <PayPalScriptProvider options={{ "client-id": "test" }}>
+                        <div style={{ minHeight: 150 }}>
+                          <PayPalButtons 
+                            style={{ layout: "vertical", shape: "pill", color: "blue" }}
+                            createOrder={(data, actions) => {
+                              return actions.order.create({
+                                purchase_units: [{
+                                  amount: { value: PLANS.find(p => p.name === formData.plan)?.price }
+                                }]
+                              });
+                            }}
+                            onApprove={async (data, actions) => {
+                              const details = await actions.order.capture();
+                              console.log("PayPal Transaction Completed", details);
+                              // Submit form after successful payment
+                              handleSubmit({ preventDefault: () => {} });
+                            }}
+                          />
+                        </div>
+                      </PayPalScriptProvider>
+                    ) : (
+                      <div style={{ textAlign: 'center', padding: '20px', color: '#ff8da1' }}>
+                        PayPal is currently disabled. Please contact support.
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 4px', opacity: 0.6, justifyContent: 'center' }}>
                       <ShieldCheck size={14} />
-                      <span style={{ fontSize: 11 }}>Secure 256-bit SSL encrypted payment</span>
+                      <span style={{ fontSize: 11 }}>Secure PayPal Checkout</span>
                     </div>
-                  </>
+                  </div>
                 ) : (
                   <div style={{ textAlign: 'center', padding: '20px 0' }}>
                     <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(46,139,110,0.1)', color: '#2E8B6E', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
@@ -200,14 +231,16 @@ export default function Login({ type = 'user' }) {
               </div>
             )}
 
-            <button type="submit" disabled={loading} style={{
-              width: '100%', padding: '15px', background: loading ? 'rgba(109,74,232,0.5)' : 'linear-gradient(135deg, #6D4AE8, #F43F8E)',
-              color: 'white', border: 'none', borderRadius: 16, fontSize: 16, fontWeight: 800,
-              cursor: loading ? 'not-allowed' : 'pointer', transition: 'all 0.2s', marginTop: 24,
-              boxShadow: '0 10px 25px rgba(109,74,232,0.3)'
-            }}>
-              {loading ? 'Processing...' : isRegister ? (step === 3 ? 'Complete Signup' : 'Continue') : 'Sign In'}
-            </button>
+            {(step !== 3 || formData.plan === 'Free' || isAdmin || !isRegister) && (
+              <button type="submit" disabled={loading} style={{
+                width: '100%', padding: '15px', background: loading ? 'rgba(109,74,232,0.5)' : 'linear-gradient(135deg, #6D4AE8, #F43F8E)',
+                color: 'white', border: 'none', borderRadius: 16, fontSize: 16, fontWeight: 800,
+                cursor: loading ? 'not-allowed' : 'pointer', transition: 'all 0.2s', marginTop: 24,
+                boxShadow: '0 10px 25px rgba(109,74,232,0.3)'
+              }}>
+                {loading ? 'Processing...' : isRegister ? (step === 3 ? 'Complete Signup' : 'Continue') : 'Sign In'}
+              </button>
+            )}
           </form>
 
           {!isAdmin && (
@@ -229,7 +262,7 @@ export default function Login({ type = 'user' }) {
       </main>
 
       <footer style={{ padding: '30px', textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: 12 }}>
-         &copy; 2026 ToonVault. All rights reserved.
+         &copy; 2026 {settings.site_name}. All rights reserved.
       </footer>
     </div>
   );
