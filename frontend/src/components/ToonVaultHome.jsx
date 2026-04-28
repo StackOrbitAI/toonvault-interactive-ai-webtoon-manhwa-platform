@@ -801,13 +801,23 @@ export default function ToonVaultHome() {
                     </div>
                   ))}
                 </div>
-                <button style={{
+                <button onClick={() => navigate('/user')} style={{
                   width: "100%", padding: "14px", borderRadius: 14, border: "none",
                   background: plan.popular ? plan.accent : "white",
                   color: plan.popular ? "white" : plan.accent,
                   border: `1.5px solid ${plan.accent}`,
-                  fontSize: 14, fontWeight: 700, cursor: "pointer"
-                }}>
+                  fontSize: 14, fontWeight: 700, cursor: "pointer",
+                  transition: "all 0.2s"
+                }}
+                onMouseEnter={e => {
+                  if (plan.popular) e.currentTarget.style.background = COLORS.plumDark;
+                  else e.currentTarget.style.background = `${plan.accent}10`;
+                }}
+                onMouseLeave={e => {
+                  if (plan.popular) e.currentTarget.style.background = plan.accent;
+                  else e.currentTarget.style.background = "white";
+                }}
+                >
                   {plan.price === "0" ? "Start Free" : "Upgrade Now"}
                 </button>
               </div>
