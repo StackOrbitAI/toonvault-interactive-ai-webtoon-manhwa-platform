@@ -1,46 +1,33 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Sparkles, User, Lock, Mail, Phone, MapPin, CreditCard, ShieldCheck, Check } from 'lucide-react';
+import { Sparkles, User, Lock, Mail, Phone, MapPin, CreditCard, ShieldCheck, Check, Chrome, Facebook, Linkedin, Apple, Github, Instagram, Twitter, ArrowRight, Zap, Trophy, Rocket, Shield } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import axios from 'axios';
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
 // ═══════════════════════════════════════════════════════
-// DESIGN TOKENS (Synced with Dashboard)
+// DESIGN TOKENS
 // ═══════════════════════════════════════════════════════
 const C = {
-  bg: "#0C0A14",
-  surface: "#13101F",
-  surfaceHover: "#1A1628",
-  card: "#1A1628",
-  cardBorder: "#2A2240",
-  glass: "rgba(255,255,255,0.04)",
-  glassBorder: "rgba(255,255,255,0.08)",
+  bg: "#050408",
+  surface: "#0D0B1A",
+  card: "#120F24",
+  cardBorder: "rgba(255,255,255,0.06)",
   plum: "#8B5CF6",
-  plumLight: "#A78BFA",
-  plumDark: "#6D28D9",
-  plumGlow: "rgba(139,92,246,0.35)",
-  rose: "#F472B6",
-  roseGlow: "rgba(244,114,182,0.3)",
+  plumGlow: "rgba(139,92,246,0.2)",
+  rose: "#F43F8E",
+  roseGlow: "rgba(244,63,142,0.2)",
   gold: "#F59E0B",
-  goldLight: "#FCD34D",
-  cyan: "#22D3EE",
-  cyanGlow: "rgba(34,211,238,0.25)",
-  green: "#10B981",
-  orange: "#F97316",
   text: "#F1EEF9",
-  textMuted: "#9CA3AF",
-  textDim: "#6B7280",
-  ink: "#0C0A14",
-  gradient: "linear-gradient(135deg, #8B5CF6 0%, #F472B6 100%)",
-  gradientGold: "linear-gradient(135deg, #F59E0B 0%, #F97316 100%)",
+  textDim: "#6B6789",
+  gradient: "linear-gradient(135deg, #8B5CF6 0%, #F43F8E 100%)",
 };
 
 export default function Login({ type = 'user' }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [isRegister, setIsRegister] = useState(false);
-  const [step, setStep] = useState(1); // 1: Auth, 2: Address, 3: Payment
+  const [step, setStep] = useState(1); 
   const [paypalEnabled, setPaypalEnabled] = useState(true);
   const [settings, setSettings] = useState({ site_name: "ToonVault" });
   const [formData, setFormData] = useState({
@@ -48,7 +35,6 @@ export default function Login({ type = 'user' }) {
     plan: 'Free',
     phone: '',
     address: { street: '', city: '', state: '', zip: '', country: 'USA' },
-    billing: { cardNumber: '', expiry: '', cvv: '' }
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -56,12 +42,13 @@ export default function Login({ type = 'user' }) {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const planParam = params.get('plan');
+    const isRegParam = params.get('register');
     if (planParam) {
       setFormData(prev => ({ ...prev, plan: planParam }));
       setIsRegister(true);
     }
+    if (isRegParam === 'true') setIsRegister(true);
 
-    // Fetch payment settings
     axios.get('/api/settings/public')
       .then(res => {
         setPaypalEnabled(res.data.payment_paypal_enabled === 'true');
@@ -71,12 +58,14 @@ export default function Login({ type = 'user' }) {
   }, [location]);
 
   const isAdmin = type === 'admin';
-  const title = isAdmin ? `Admin Login — ${settings.site_name}` : isRegister ? `Join ${settings.site_name} — Membership` : `Sign In — ${settings.site_name}`;
+  const title = isAdmin ? `Admin Portal` : isRegister ? `Create Your Account` : `Sign In`;
 
+  // SYNCED WITH HOMEPAGE
   const PLANS = [
-    { name: 'Free', price: '0', color: C.textMuted },
-    { name: 'Silver', price: '9.99', color: C.plumLight },
-    { name: 'Gold', price: '19.99', color: C.gold }
+    { name: 'Free', price: '0', icon: <Zap size={20} />, features: ['Read 10 stories/mo', '5 AI Generations'] },
+    { name: 'Bronze', price: '4.99', icon: <Shield size={20} />, features: ['Read 50 stories/mo', '20 AI Generations'] },
+    { name: 'Silver', price: '9.99', icon: <Rocket size={20} />, features: ['Read 100 stories/mo', '50 AI Generations'] },
+    { name: 'Gold', price: '19.99', icon: <Trophy size={20} />, features: ['Unlimited reading', 'Unlimited AI Generations'] }
   ];
 
   const handleSubmit = async (e) => {
@@ -106,257 +95,273 @@ export default function Login({ type = 'user' }) {
         navigate('/dashboard');
       }
     } catch (err) {
-      setError(err.response?.data?.message || err.response?.data?.error || 'Failed. Please try again.');
+      setError(err.response?.data?.message || err.response?.data?.error || 'Authentication error.');
     } finally {
       setLoading(false);
     }
   };
 
   const inputStyle = {
-    width: '100%', padding: '14px 14px 14px 44px',
-    background: C.bg, border: `1px solid ${C.cardBorder}`,
-    borderRadius: 14, color: C.text, fontSize: 14, outline: 'none',
-    boxSizing: 'border-box', transition: 'all 0.2s',
-    fontFamily: "'DM Sans', sans-serif"
+    width: '100%', padding: '16px 16px 16px 50px',
+    background: '#18162A', border: `1px solid ${C.cardBorder}`,
+    borderRadius: 18, color: C.text, fontSize: 14, outline: 'none',
+    boxSizing: 'border-box', transition: 'all 0.3s',
   };
 
   const iconStyle = {
-    position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: C.textDim
+    position: 'absolute', left: 18, top: '50%', transform: 'translateY(-50%)', color: C.textDim
   };
 
   return (
     <div style={{
       minHeight: '100vh', display: 'flex', flexDirection: 'column',
-      background: C.bg,
-      fontFamily: "'DM Sans', sans-serif", color: C.text,
-      position: 'relative', overflow: 'hidden'
+      background: C.bg, fontFamily: "'Inter', sans-serif", color: C.text,
+      position: 'relative', overflowX: 'hidden'
     }}>
-      <Helmet>
-        <title>{title}</title>
-      </Helmet>
+      <Helmet><title>{title} — {settings.site_name}</title></Helmet>
 
-      {/* Decorative Blobs */}
-      <div style={{ position: 'absolute', top: -100, right: -100, width: 400, height: 400, borderRadius: '50%', background: C.plumGlow, filter: 'blur(100px)', zIndex: 0 }} />
-      <div style={{ position: 'absolute', bottom: -100, left: -100, width: 400, height: 400, borderRadius: '50%', background: C.roseGlow, filter: 'blur(100px)', zIndex: 0 }} />
-
-      {/* Header */}
+      {/* ═══ HEADER ═══ */}
       <header style={{ 
-        padding: '16px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
-        background: 'rgba(12,10,20,0.85)', backdropFilter: 'blur(20px)', 
-        borderBottom: `1px solid ${C.cardBorder}`, zIndex: 10 
+        padding: '24px 60px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
+        background: 'rgba(5,4,8,0.8)', backdropFilter: 'blur(30px)', 
+        borderBottom: `1px solid ${C.cardBorder}`, zIndex: 1000, position: 'sticky', top: 0
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }} onClick={() => navigate('/')}>
-          <div style={{ 
-            width: 32, height: 32, borderRadius: 10, 
-            background: C.gradient, 
-            display: 'flex', alignItems: 'center', justifyContent: 'center', 
-            fontSize: 16, boxShadow: `0 0 16px ${C.plumGlow}` 
-          }}>📖</div>
-          <span style={{ fontSize: 20, fontWeight: 900, letterSpacing: -0.5 }}>
-            <span style={{ color: C.plumLight }}>Toon</span><span style={{ color: C.rose }}>Vault</span>
-          </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, cursor: 'pointer' }} onClick={() => navigate('/')}>
+          <div style={{ width: 42, height: 42, borderRadius: 12, background: C.gradient, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, boxShadow: `0 0 30px ${C.plumGlow}` }}>📖</div>
+          <span style={{ fontSize: 26, fontWeight: 900, letterSpacing: -1.2 }}>Toon<span style={{ color: C.rose }}>Vault</span></span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+           {['Stories', 'Genres', 'Creators', 'Plans'].map(item => <span key={item} onClick={() => navigate('/')} style={{ fontSize: 14, fontWeight: 600, color: C.textDim, cursor: 'pointer' }}>{item}</span>)}
+           <button onClick={() => navigate('/')} style={{ padding: '10px 24px', borderRadius: 20, border: `1px solid ${C.plum}`, background: 'transparent', color: C.plum, fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>Back to Site</button>
         </div>
       </header>
 
-      <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 20px', zIndex: 10 }}>
-        <div style={{ 
-          background: C.card, borderRadius: 28, border: `1px solid ${C.cardBorder}`, 
-          width: '100%', maxWidth: isRegister ? 520 : 420, padding: '40px',
-          boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
-          animation: 'fadeIn 0.5s ease-out'
-        }}>
-          
-          <div style={{ textAlign: 'center', marginBottom: 32 }}>
-             <h1 style={{ fontSize: 28, fontWeight: 900, marginBottom: 8, letterSpacing: -0.5 }}>
-               {isAdmin ? 'Admin Portal' : isRegister ? 'Create Your Account' : 'Welcome Back'}
-             </h1>
-             <p style={{ fontSize: 14, color: C.textDim }}>
-               {isRegister ? `Step ${step} of 3` : 'Enter your credentials to continue'}
-             </p>
-          </div>
-
-          {error && (
-            <div style={{ 
-              background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.4)', 
-              borderRadius: 12, padding: '12px', color: '#EF4444', 
-              fontSize: 13, textAlign: 'center', marginBottom: 20 
-            }}>
-              {error}
+      <main style={{ flex: 1, display: 'flex', background: '#08070F' }}>
+        
+        {/* Left Side: Onboarding Sidebar */}
+        {isRegister && !isAdmin && (
+          <div style={{ 
+            width: 380, borderRight: `1px solid ${C.cardBorder}`, padding: '80px 60px',
+            background: 'linear-gradient(180deg, #0A0914 0%, #050408 100%)',
+            display: 'flex', flexDirection: 'column', gap: 48
+          }}>
+            <h2 style={{ fontSize: 24, fontWeight: 900, color: 'white', marginBottom: 20 }}>Onboarding</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 40 }}>
+              {[
+                { s: 1, title: 'Choose Plan', desc: 'Select your membership' },
+                { s: 2, title: 'Identity', desc: 'Personal details & Contact' },
+                { s: 3, title: 'Verify & Start', desc: 'Complete registration' }
+              ].map(item => (
+                <div key={item.s} style={{ display: 'flex', gap: 20, opacity: step >= item.s ? 1 : 0.3, transition: 'all 0.5s' }}>
+                  <div style={{ 
+                    width: 44, height: 44, borderRadius: 14, border: `2px solid ${step === item.s ? C.plum : C.cardBorder}`,
+                    background: step > item.s ? C.plum : 'transparent',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 800,
+                    color: 'white', boxShadow: step === item.s ? `0 0 20px ${C.plumGlow}` : 'none'
+                  }}>
+                    {step > item.s ? <Check size={20} /> : item.s}
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: step === item.s ? 'white' : C.textDim }}>{item.title}</div>
+                    <div style={{ fontSize: 12, color: C.textDim, marginTop: 4 }}>{item.desc}</div>
+                  </div>
+                </div>
+              ))}
             </div>
-          )}
+            <div style={{ marginTop: 'auto', padding: 24, background: C.card, borderRadius: 24, border: `1px solid ${C.cardBorder}` }}>
+               <Sparkles size={24} style={{ color: C.gold, marginBottom: 12 }} />
+               <div style={{ fontSize: 14, fontWeight: 700, color: 'white' }}>AI Advantage</div>
+               <p style={{ fontSize: 12, color: C.textDim, marginTop: 6, lineHeight: 1.5 }}>Our AI helps you generate panels, scripts, and backgrounds in seconds.</p>
+            </div>
+          </div>
+        )}
 
-          <form onSubmit={handleSubmit}>
-            {isRegister && !isAdmin && step === 1 && (
-              <div style={{ marginBottom: 24 }}>
-                <label style={{ fontSize: 11, fontWeight: 700, color: C.textDim, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12, display: 'block' }}>Choose Your Plan</label>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+        {/* Right Side: Step-by-Step Form Content */}
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px' }}>
+          <div style={{ width: '100%', maxWidth: 520, animation: 'fadeInUp 0.6s ease-out' }}>
+            <div style={{ marginBottom: 40 }}>
+               <h1 style={{ fontSize: 36, fontWeight: 900, letterSpacing: -1.5, marginBottom: 12 }}>
+                 {isAdmin ? 'Admin Portal' : isRegister ? (step === 1 ? 'Choose Your Plan' : step === 2 ? 'Identity Details' : 'Verify & Start') : 'Welcome Back'}
+               </h1>
+               <p style={{ fontSize: 16, color: C.textDim }}>
+                 {isRegister ? 
+                   (step === 1 ? 'Select a membership to unlock ToonVault.' : step === 2 ? 'Enter your personal and contact details.' : 'Review your selection and complete signup.') 
+                   : 'Enter your credentials to continue.'}
+               </p>
+            </div>
+
+            {error && (
+              <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: 16, padding: '16px', color: '#EF4444', fontSize: 14, fontWeight: 600, marginBottom: 30 }}>⚠️ {error}</div>
+            )}
+
+            <form onSubmit={handleSubmit}>
+              {/* STEP 1: PLAN SELECTION */}
+              {isRegister && step === 1 && !isAdmin && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                   {PLANS.map(p => (
                     <div key={p.name} onClick={() => setFormData({ ...formData, plan: p.name })} style={{
-                      padding: '16px 10px', borderRadius: 16, border: `2px solid ${formData.plan === p.name ? p.color : C.glassBorder}`,
-                      background: formData.plan === p.name ? `${p.color}15` : C.bg, 
-                      cursor: 'pointer', textAlign: 'center', transition: 'all 0.2s'
+                      padding: '20px', borderRadius: 22, border: `2px solid ${formData.plan === p.name ? C.plum : C.cardBorder}`,
+                      background: formData.plan === p.name ? 'rgba(139,92,246,0.08)' : '#12101F',
+                      cursor: 'pointer', transition: 'all 0.3s', display: 'flex', alignItems: 'center', gap: 18
                     }}>
-                      <div style={{ fontSize: 14, fontWeight: 800, color: formData.plan === p.name ? p.color : C.text }}>{p.name}</div>
-                      <div style={{ fontSize: 11, color: C.textDim, marginTop: 2 }}>${p.price}/mo</div>
+                      <div style={{ width: 44, height: 44, borderRadius: 12, background: formData.plan === p.name ? C.plum : '#1B182B', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>{p.icon}</div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 17, fontWeight: 800 }}>{p.name}</div>
+                        <div style={{ fontSize: 11, color: C.textDim, marginTop: 2 }}>{p.features[0]} • {p.features[1]}</div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: 18, fontWeight: 900, color: formData.plan === p.name ? C.plum : 'white' }}>${p.price}</div>
+                        <div style={{ fontSize: 10, color: C.textDim }}>/mo</div>
+                      </div>
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* STEP 1: Basic Info */}
-            {(step === 1 || !isRegister || isAdmin) && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                {isRegister && !isAdmin && (
+              {/* STEP 2: IDENTITY & CONTACT */}
+              {isRegister && step === 2 && !isAdmin && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                   <div style={{ position: 'relative' }}>
-                    <User size={18} style={iconStyle} />
+                    <User size={20} style={iconStyle} />
                     <input type="text" placeholder="Full Name" value={formData.username} required style={inputStyle} onChange={e => setFormData({ ...formData, username: e.target.value })} />
                   </div>
-                )}
-                <div style={{ position: 'relative' }}>
-                  <Mail size={18} style={iconStyle} />
-                  <input type="email" placeholder="Email Address" value={formData.email} required style={inputStyle} onChange={e => setFormData({ ...formData, email: e.target.value })} />
-                </div>
-                {isRegister && !isAdmin && (
                   <div style={{ position: 'relative' }}>
-                    <Phone size={18} style={iconStyle} />
+                    <Mail size={20} style={iconStyle} />
+                    <input type="email" placeholder="Email Address" value={formData.email} required style={inputStyle} onChange={e => setFormData({ ...formData, email: e.target.value })} />
+                  </div>
+                  <div style={{ position: 'relative' }}>
+                    <Phone size={20} style={iconStyle} />
                     <input type="tel" placeholder="Phone Number" value={formData.phone} required style={inputStyle} onChange={e => setFormData({ ...formData, phone: e.target.value })} />
                   </div>
-                )}
-                <div style={{ position: 'relative' }}>
-                  <Lock size={18} style={iconStyle} />
-                  <input type="password" placeholder="Password" value={formData.password} required style={inputStyle} onChange={e => setFormData({ ...formData, password: e.target.value })} />
+                  <div style={{ position: 'relative' }}>
+                    <Lock size={20} style={iconStyle} />
+                    <input type="password" placeholder="Set Secure Password" value={formData.password} required style={inputStyle} onChange={e => setFormData({ ...formData, password: e.target.value })} />
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* STEP 2: Address Info */}
-            {isRegister && step === 2 && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <div style={{ position: 'relative' }}>
-                  <MapPin size={18} style={iconStyle} />
-                  <input type="text" placeholder="Street Address" value={formData.address.street} required style={inputStyle} onChange={e => setFormData({ ...formData, address: { ...formData.address, street: e.target.value } })} />
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                  <input type="text" placeholder="City" value={formData.address.city} required style={{ ...inputStyle, paddingLeft: 16 }} onChange={e => setFormData({ ...formData, address: { ...formData.address, city: e.target.value } })} />
-                  <input type="text" placeholder="State (e.g. CA)" value={formData.address.state} required style={{ ...inputStyle, paddingLeft: 16 }} onChange={e => setFormData({ ...formData, address: { ...formData.address, state: e.target.value } })} />
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                  <input type="text" placeholder="Zip Code" value={formData.address.zip} required style={{ ...inputStyle, paddingLeft: 16 }} onChange={e => setFormData({ ...formData, address: { ...formData.address, zip: e.target.value } })} />
-                  <input type="text" placeholder="Country" value={formData.address.country} readOnly style={{ ...inputStyle, paddingLeft: 16, opacity: 0.6 }} />
-                </div>
-              </div>
-            )}
-
-            {/* STEP 3: Payment Info */}
-            {isRegister && step === 3 && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <div style={{ 
-                  padding: '20px', background: C.bg, borderRadius: 20, 
-                  marginBottom: 10, border: `1px solid ${C.cardBorder}` 
-                }}>
-                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                      <span style={{ fontSize: 13, color: C.textDim }}>Selected Plan:</span>
-                      <span style={{ fontSize: 13, fontWeight: 800, color: C.plumLight }}>{formData.plan}</span>
-                   </div>
-                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ fontSize: 13, color: C.textDim }}>Monthly Charge:</span>
-                      <span style={{ fontSize: 18, fontWeight: 900, color: C.rose }}>${PLANS.find(p => p.name === formData.plan)?.price}</span>
-                   </div>
-                </div>
-                
-                {formData.plan !== 'Free' ? (
-                  <div style={{ marginTop: 10 }}>
-                    {paypalEnabled ? (
-                      <PayPalScriptProvider options={{ "client-id": "test" }}>
-                        <div style={{ minHeight: 150 }}>
-                          <PayPalButtons 
-                            style={{ layout: "vertical", shape: "rect", color: "blue" }}
-                            createOrder={(data, actions) => {
-                              return actions.order.create({
-                                purchase_units: [{
-                                  amount: { value: PLANS.find(p => p.name === formData.plan)?.price }
-                                }]
-                              });
-                            }}
-                            onApprove={async (data, actions) => {
-                              const details = await actions.order.capture();
-                              console.log("PayPal Transaction Completed", details);
-                              handleSubmit();
-                            }}
-                          />
-                        </div>
-                      </PayPalScriptProvider>
-                    ) : (
-                      <div style={{ textAlign: 'center', padding: '20px', color: '#ff8da1' }}>
-                        PayPal is currently disabled. Please contact support.
+              {/* STEP 3: VERIFY & PAYMENT */}
+              {isRegister && step === 3 && !isAdmin && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                   <div style={{ padding: '32px', background: 'rgba(255,255,255,0.03)', borderRadius: 32, border: `1px solid ${C.cardBorder}` }}>
+                      <div style={{ fontSize: 12, fontWeight: 900, color: C.textDim, textTransform: 'uppercase', letterSpacing: 2, marginBottom: 20 }}>Checkout Summary</div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+                        <span style={{ fontSize: 16, color: C.textDim }}>{formData.plan} Plan</span>
+                        <span style={{ fontSize: 16, fontWeight: 800 }}>${PLANS.find(p => p.name === formData.plan)?.price}/mo</span>
                       </div>
-                    )}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 4px', opacity: 0.6, justifyContent: 'center' }}>
-                      <ShieldCheck size={14} />
-                      <span style={{ fontSize: 11 }}>Secure PayPal Checkout</span>
-                    </div>
+                      <div style={{ height: 1, background: C.cardBorder, margin: '18px 0' }} />
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                        <span style={{ fontSize: 18, fontWeight: 900 }}>Grand Total</span>
+                        <span style={{ fontSize: 32, fontWeight: 900, color: C.rose }}>${PLANS.find(p => p.name === formData.plan)?.price}</span>
+                      </div>
+                   </div>
+                   {formData.plan !== 'Free' ? (
+                     <PayPalScriptProvider options={{ "client-id": "test" }}>
+                       <PayPalButtons 
+                         style={{ layout: "vertical", shape: "pill", color: "blue" }}
+                         createOrder={(data, actions) => actions.order.create({ purchase_units: [{ amount: { value: PLANS.find(p => p.name === formData.plan)?.price } }] })}
+                         onApprove={async (data, actions) => { await actions.order.capture(); handleSubmit(); }}
+                       />
+                     </PayPalScriptProvider>
+                   ) : (
+                     <div style={{ textAlign: 'center', padding: '10px 0' }}>
+                        <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(16,185,129,0.1)', color: C.green, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}><Check size={36} strokeWidth={3} /></div>
+                        <p style={{ fontSize: 15, color: C.textDim }}>No credit card required for Free plan.</p>
+                     </div>
+                   )}
+                </div>
+              )}
+
+              {/* LOGIN / ADMIN FORM */}
+              {(!isRegister || isAdmin) && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                  <div style={{ position: 'relative' }}>
+                    <Mail size={20} style={iconStyle} />
+                    <input type="email" placeholder="Email Address" value={formData.email} required style={inputStyle} onChange={e => setFormData({ ...formData, email: e.target.value })} />
                   </div>
-                ) : (
-                  <div style={{ textAlign: 'center', padding: '20px 0' }}>
-                    <div style={{ 
-                      width: 56, height: 56, borderRadius: '50%', 
-                      background: 'rgba(16, 185, 129, 0.1)', color: C.green, 
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                      margin: '0 auto 16px', boxShadow: `0 0 20px rgba(16, 185, 129, 0.2)`
-                    }}>
-                       <Check size={28} strokeWidth={3} />
-                    </div>
-                    <p style={{ fontSize: 14, color: C.textMuted, margin: 0 }}>No payment required for the Free plan. Just click complete!</p>
+                  <div style={{ position: 'relative' }}>
+                    <Lock size={20} style={iconStyle} />
+                    <input type="password" placeholder="Password" value={formData.password} required style={inputStyle} onChange={e => setFormData({ ...formData, password: e.target.value })} />
                   </div>
-                )}
+                </div>
+              )}
+
+              <button type="submit" disabled={loading} style={{
+                width: '100%', padding: '18px', background: loading ? C.plumGlow : C.gradient,
+                color: 'white', border: 'none', borderRadius: 20, fontSize: 16, fontWeight: 900,
+                cursor: loading ? 'not-allowed' : 'pointer', transition: 'all 0.3s', marginTop: 32,
+                boxShadow: loading ? 'none' : `0 15px 35px ${C.plumGlow}`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12
+              }}>
+                {loading ? 'Processing...' : isRegister ? (step === 3 ? 'Start My Journey' : 'Continue to Identity') : 'Sign In'}
+                {!loading && <ArrowRight size={20} />}
+              </button>
+            </form>
+
+            {!isAdmin && (
+              <div style={{ textAlign: 'center', marginTop: 32 }}>
+                 <button onClick={() => { setIsRegister(!isRegister); setStep(1); setError(''); }} style={{ background: 'none', border: 'none', color: C.textDim, fontSize: 15, fontWeight: 700, cursor: 'pointer' }}>
+                   {isRegister ? <span>Already a member? <span style={{ color: C.plum }}>Sign In</span></span> : <span>New to ToonVault? <span style={{ color: C.rose }}>Create Account</span></span>}
+                 </button>
               </div>
             )}
 
-            {(step !== 3 || formData.plan === 'Free' || isAdmin || !isRegister) && (
-              <button type="submit" disabled={loading} style={{
-                width: '100%', padding: '16px', background: loading ? C.plumDark : C.gradient,
-                color: 'white', border: 'none', borderRadius: 18, fontSize: 16, fontWeight: 800,
-                cursor: loading ? 'not-allowed' : 'pointer', transition: 'all 0.2s', marginTop: 24,
-                boxShadow: loading ? 'none' : `0 10px 25px ${C.plumGlow}`,
-                fontFamily: "'DM Sans', sans-serif"
-              }}>
-                {loading ? 'Processing...' : isRegister ? (step === 3 ? 'Complete Signup' : 'Continue') : 'Sign In'}
-              </button>
+            {!isRegister && !isAdmin && (
+               <div style={{ marginTop: 40 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14, color: C.textDim, fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 2, marginBottom: 20 }}>
+                     <div style={{ flex: 1, height: 1, background: C.cardBorder }} />
+                     <span>Social Login</span>
+                     <div style={{ flex: 1, height: 1, background: C.cardBorder }} />
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+                     {[
+                       { name: 'Google', icon: <Chrome size={20} />, color: '#EA4335' },
+                       { name: 'Instagram', icon: <Instagram size={20} />, color: '#E4405F' },
+                       { name: 'Facebook', icon: <Facebook size={20} />, color: '#1877F2' },
+                       { name: 'LinkedIn', icon: <Linkedin size={20} />, color: '#0A66C2' }
+                     ].map(s => (
+                       <button key={s.name} type="button" style={{ 
+                         height: 50, borderRadius: 16, background: '#131121', border: `1px solid ${C.cardBorder}`,
+                         display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s'
+                       }} onMouseEnter={e => e.currentTarget.style.background = '#1B1930'} onMouseLeave={e => e.currentTarget.style.background = '#131121'}>
+                         <span style={{ color: s.color }}>{s.icon}</span>
+                       </button>
+                     ))}
+                  </div>
+               </div>
             )}
-          </form>
-
-          {!isAdmin && (
-            <div style={{ textAlign: 'center', marginTop: 24 }}>
-               <button onClick={() => { setIsRegister(!isRegister); setStep(1); setError(''); }} style={{ background: 'none', border: 'none', color: C.textDim, fontSize: 13, cursor: 'pointer', transition: 'color 0.2s' }}
-                 onMouseEnter={e => e.currentTarget.style.color = C.plumLight}
-                 onMouseLeave={e => e.currentTarget.style.color = C.textDim}
-               >
-                 {isRegister ? 'Already have an account? Sign In' : "Don't have an account? Join Now"}
-               </button>
-            </div>
-          )}
-
-          {isRegister && step > 1 && (
-            <div style={{ textAlign: 'center', marginTop: 16 }}>
-               <button onClick={() => setStep(step - 1)} style={{ background: 'none', border: 'none', color: C.textDim, fontSize: 12, cursor: 'pointer' }}>
-                 ← Back to previous step
-               </button>
-            </div>
-          )}
+          </div>
         </div>
       </main>
 
-      <footer style={{ padding: '30px', textAlign: 'center', color: C.textDim, fontSize: 12, zIndex: 10 }}>
-         &copy; 2026 {settings.site_name}. All rights reserved.
+      {/* ═══ FULL FOOTER ═══ */}
+      <footer style={{ background: '#050408', padding: '100px 60px 40px', borderTop: `1px solid ${C.cardBorder}` }}>
+         <div style={{ maxWidth: 1200, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 80 }}>
+            <div>
+              <div style={{ fontSize: 24, fontWeight: 900, marginBottom: 24 }}>ToonVault</div>
+              <p style={{ fontSize: 14, color: C.textDim, lineHeight: 1.8 }}>The world's first AI-powered interactive storytelling platform. Create, read, and own your stories like never before.</p>
+            </div>
+            {['Platform', 'Company', 'Resources', 'Legal'].map(section => (
+              <div key={section}>
+                <h4 style={{ fontSize: 14, fontWeight: 900, color: 'white', marginBottom: 28, textTransform: 'uppercase', letterSpacing: 2 }}>{section}</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                   {['Overview', 'Features', 'Community'].map(i => <span key={i} onClick={() => navigate('/')} style={{ fontSize: 14, color: C.textDim, cursor: 'pointer' }}>{i}</span>)}
+                </div>
+              </div>
+            ))}
+         </div>
+         <div style={{ marginTop: 80, borderTop: `1px solid ${C.cardBorder}`, paddingTop: 40, textAlign: 'center', color: C.textDim, fontSize: 14 }}>
+           &copy; 2026 ToonVault AI. All Rights Reserved.
+         </div>
       </footer>
 
       <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(20px); }
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(40px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        input::placeholder { color: ${C.textDim}; opacity: 0.6; }
+        input::placeholder { color: ${C.textDim}; opacity: 0.4; }
+        input:focus { border-color: ${C.plum} !important; background: #1B1935 !important; box-shadow: 0 0 0 4px ${C.plumGlow} !important; }
       `}</style>
     </div>
   );

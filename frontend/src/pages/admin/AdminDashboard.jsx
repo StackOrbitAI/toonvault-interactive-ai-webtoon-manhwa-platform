@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { api, logout } from "../../api";
 
 // ═══════════════════════════════════════════════════════
 //  DESIGN TOKENS
@@ -213,139 +213,8 @@ function Toggle({ checked, onChange, label }) {
 // ═══════════════════════════════════════════════════════
 //  LOGIN PAGE
 // ═══════════════════════════════════════════════════════
-function LoginPage({ onLogin }) {
-  const [tab, setTab] = useState("login"); // login | signup
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+// Social login functionality moved to common Login component
 
-  const handleSubmit = async () => {
-    if (!email || !password) { setError("Please fill all fields"); return; }
-    setLoading(true); setError("");
-    await new Promise(r => setTimeout(r, 1200));
-    if (tab === "login" && email === "admin@toonvault.io" && password === "admin123") {
-      onLogin({ name: "Super Admin", email, role: "admin", avatar: "SA" });
-    } else if (tab === "signup") {
-      onLogin({ name: name || email.split("@")[0], email, role: "admin", avatar: name?.[0]?.toUpperCase() || "A" });
-    } else {
-      setError("Invalid credentials. Try admin@toonvault.io / admin123");
-    }
-    setLoading(false);
-  };
-
-  const SocialBtn = ({ icon, label, color, bg }) => (
-    <button style={{
-      flex: 1, padding: "11px 10px", borderRadius: 11, border: `1px solid ${C.border}`,
-      background: C.surface2, color: C.text, fontSize: 12, fontWeight: 600,
-      cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-      gap: 8, transition: "all 0.2s",
-    }}
-      onMouseEnter={e => { e.currentTarget.style.borderColor = color; e.currentTarget.style.background = bg; }}
-      onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.background = C.surface2; }}
-      onClick={() => onLogin({ name: `${label} User`, email: `${label.toLowerCase()}@oauth.com`, role: "admin", avatar: icon })}
-    >
-      <span style={{ fontSize: 16 }}>{icon}</span> {label}
-    </button>
-  );
-
-  return (
-    <div style={{
-      minHeight: "100vh", background: C.bg, display: "flex", alignItems: "center", justifyContent: "center",
-      fontFamily: "'DM Sans', 'Segoe UI', sans-serif",
-      backgroundImage: "radial-gradient(ellipse at 20% 30%, rgba(139,92,246,0.08) 0%, transparent 50%), radial-gradient(ellipse at 80% 70%, rgba(244,63,142,0.06) 0%, transparent 50%)",
-    }}>
-      {/* Glow orbs */}
-      <div style={{ position: "fixed", top: "15%", left: "10%", width: 300, height: 300, borderRadius: "50%", background: "rgba(139,92,246,0.06)", filter: "blur(60px)", pointerEvents: "none" }} />
-      <div style={{ position: "fixed", bottom: "15%", right: "10%", width: 250, height: 250, borderRadius: "50%", background: "rgba(244,63,142,0.05)", filter: "blur(60px)", pointerEvents: "none" }} />
-
-      <div style={{ width: 420, padding: "0 20px" }}>
-        {/* Logo */}
-        <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <div style={{
-            width: 56, height: 56, borderRadius: 16,
-            background: "linear-gradient(135deg, #8B5CF6, #F43F8E)",
-            display: "inline-flex", alignItems: "center", justifyContent: "center",
-            fontSize: 26, marginBottom: 14, boxShadow: "0 8px 32px rgba(139,92,246,0.4)",
-          }}>📖</div>
-          <div style={{ fontSize: 26, fontWeight: 800, color: C.text, letterSpacing: -0.5 }}>
-            Toon<span style={{ color: C.rose }}>Vault</span>
-            <span style={{ fontSize: 12, fontWeight: 600, color: C.muted, marginLeft: 8, letterSpacing: 1 }}>ADMIN</span>
-          </div>
-          <div style={{ fontSize: 13, color: C.muted, marginTop: 6 }}>Command center for your platform</div>
-        </div>
-
-        <div style={{
-          background: C.surface, border: `1px solid ${C.border}`,
-          borderRadius: 20, padding: "28px",
-          boxShadow: "0 24px 80px rgba(0,0,0,0.5)",
-        }}>
-          {/* Tabs */}
-          <div style={{ display: "flex", background: C.surface2, borderRadius: 12, padding: 4, marginBottom: 24 }}>
-            {["login", "signup"].map(t => (
-              <button key={t} onClick={() => { setTab(t); setError(""); }} style={{
-                flex: 1, padding: "8px", borderRadius: 9, border: "none",
-                background: tab === t ? C.plum : "transparent",
-                color: tab === t ? C.white : C.muted,
-                fontSize: 13, fontWeight: 600, cursor: "pointer", transition: "all 0.2s",
-                textTransform: "capitalize",
-              }}>{t === "login" ? "Sign In" : "Create Account"}</button>
-            ))}
-          </div>
-
-          {/* Social Auth */}
-          <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
-            <SocialBtn icon="G" label="Google" color={C.google} bg="rgba(66,133,244,0.08)" />
-            <SocialBtn icon="f" label="Facebook" color={C.facebook} bg="rgba(24,119,242,0.08)" />
-          </div>
-
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
-            <div style={{ flex: 1, height: 1, background: C.border }} />
-            <span style={{ fontSize: 11, color: C.muted2 }}>OR CONTINUE WITH EMAIL</span>
-            <div style={{ flex: 1, height: 1, background: C.border }} />
-          </div>
-
-          {tab === "signup" && (
-            <Input label="FULL NAME" value={name} onChange={setName} placeholder="Your display name" icon="👤" />
-          )}
-          <Input label="EMAIL ADDRESS" value={email} onChange={setEmail} placeholder="admin@toonvault.io" icon="✉️" type="email" />
-          <Input label="PASSWORD" value={password} onChange={setPassword} placeholder="••••••••" icon="🔐" type="password"
-            hint={tab === "login" ? "Demo: admin@toonvault.io / admin123" : "Min 8 characters"} />
-
-          {error && (
-            <div style={{
-              background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)",
-              borderRadius: 10, padding: "10px 14px", fontSize: 12, color: C.red, marginBottom: 16,
-            }}>⚠️ {error}</div>
-          )}
-
-          <button onClick={handleSubmit} disabled={loading} style={{
-            width: "100%", padding: "13px",
-            background: loading ? C.muted2 : "linear-gradient(135deg, #8B5CF6, #F43F8E)",
-            border: "none", borderRadius: 12, fontSize: 14, fontWeight: 700,
-            color: C.white, cursor: loading ? "default" : "pointer",
-            transition: "all 0.2s", letterSpacing: 0.3,
-            boxShadow: loading ? "none" : "0 4px 20px rgba(139,92,246,0.4)",
-          }}>
-            {loading ? "⏳ Authenticating..." : tab === "login" ? "🚀 Sign In to Dashboard" : "✨ Create Account"}
-          </button>
-
-          {tab === "login" && (
-            <div style={{ textAlign: "center", marginTop: 16, fontSize: 12, color: C.muted }}>
-              Forgot password?{" "}
-              <span style={{ color: C.plum2, cursor: "pointer" }}>Reset here</span>
-            </div>
-          )}
-        </div>
-
-        <div style={{ textAlign: "center", marginTop: 20, fontSize: 11, color: C.muted2 }}>
-          Protected by ToonVault Security · 256-bit encryption
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ═══════════════════════════════════════════════════════
 //  NAV ITEMS
@@ -366,11 +235,21 @@ const NAV_ITEMS = [
 //  DASHBOARD PAGE
 // ═══════════════════════════════════════════════════════
 function DashboardPage({ setPage }) {
+  const [statsData, setStatsData] = useState({ users: 0, stories: 0, revenue: 0, views: 0 });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api.getAdminStats().then(res => {
+      setStatsData(res.data);
+      setLoading(false);
+    }).catch(e => { console.error(e); setLoading(false); });
+  }, []);
+
   const stats = [
-    { icon: "👥", label: "Total Users", value: "48,291", change: "+12.4% this month", color: "plum" },
-    { icon: "📚", label: "Active Stories", value: "2,847", change: "+8.1% this week", color: "rose" },
-    { icon: "💰", label: "Monthly Revenue", value: "$18,420", change: "+22.7% vs last month", color: "gold" },
-    { icon: "👁", label: "Total Views", value: "142.6M", change: "+5.3% today", color: "green" },
+    { icon: "👥", label: "Total Users", value: statsData.users.toLocaleString(), change: "Live from DB", color: "plum" },
+    { icon: "📚", label: "Active Stories", value: statsData.stories.toLocaleString(), change: "Live from DB", color: "rose" },
+    { icon: "💰", label: "Total Revenue", value: `$${statsData.revenue.toLocaleString()}`, change: "All time", color: "gold" },
+    { icon: "👁", label: "Total Views", value: statsData.views > 1000000 ? (statsData.views / 1000000).toFixed(1) + "M" : statsData.views.toLocaleString(), change: "Platform total", color: "green" },
   ];
 
   return (
@@ -524,7 +403,15 @@ function DashboardPage({ setPage }) {
 //  USERS PAGE
 // ═══════════════════════════════════════════════════════
 function UsersPage() {
-  const [users, setUsers] = useState(MOCK_USERS);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api.getAdminUsers().then(res => {
+      setUsers(res.data);
+      setLoading(false);
+    }).catch(e => { console.error(e); setLoading(false); });
+  }, []);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("All");
   const [editUser, setEditUser] = useState(null);
@@ -729,16 +616,27 @@ function UsersPage() {
 //  STORIES PAGE
 // ═══════════════════════════════════════════════════════
 function StoriesPage() {
-  const [stories, setStories] = useState(MOCK_STORIES);
+  const [stories, setStories] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
-  const handleStatus = (id, status) => {
-    setStories(prev => prev.map(s => s.id === id ? { ...s, status } : s));
+  useEffect(() => {
+    api.getAdminStories().then(res => {
+      setStories(res.data);
+      setLoading(false);
+    }).catch(e => { console.error(e); setLoading(false); });
+  }, []);
+
+  const handleStatus = async (id, status) => {
+    try {
+      await api.updateStoryStatus(id, status);
+      setStories(prev => prev.map(s => s.id === id || s._id === id ? { ...s, status } : s));
+    } catch (e) { alert("Failed to update story status"); }
   };
 
   const filtered = stories.filter(s =>
-    s.title.toLowerCase().includes(search.toLowerCase()) ||
-    s.author.toLowerCase().includes(search.toLowerCase())
+    (s.title || "").toLowerCase().includes(search.toLowerCase()) ||
+    (s.authorName || "").toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -771,9 +669,9 @@ function StoriesPage() {
                 onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
                 <td style={{ padding: "12px 16px" }}>
                   <div style={{ fontSize: 13, fontWeight: 600, color: C.text }}>{s.title}</div>
-                  <div style={{ fontSize: 11, color: C.muted }}>{s.chapters} chapters</div>
+                  <div style={{ fontSize: 11, color: C.muted }}>{s.panels?.length || 0} panels</div>
                 </td>
-                <td style={{ padding: "12px 16px", fontSize: 13, color: C.muted }}>{s.author}</td>
+                <td style={{ padding: "12px 16px", fontSize: 13, color: C.muted }}>{s.authorName || "AI Creator"}</td>
                 <td style={{ padding: "12px 16px" }}><Badge type="Silver">{s.genre}</Badge></td>
                 <td style={{ padding: "12px 16px", fontSize: 12, fontWeight: 600, color: C.blue }}>{s.views}</td>
                 <td style={{ padding: "12px 16px", fontSize: 12, color: C.gold }}>⭐ {s.rating}</td>
@@ -1602,9 +1500,7 @@ export default function AdminDashboard() {
   const handleFinishStory = async () => {
     setIsGenerating(true);
     try {
-      const res = await axios.post('/api/stories/generate', genData, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
+      const res = await api.generateStory(genData);
       if (res.status === 200) {
         setShowGenWizard(false);
         setGenStep(1);
@@ -1612,7 +1508,7 @@ export default function AdminDashboard() {
       }
     } catch (err) {
       console.error(err);
-      alert("Story generation failed.");
+      alert("Story generation failed. Check API Keys in settings.");
     } finally {
       setIsGenerating(false);
     }
@@ -1631,9 +1527,7 @@ export default function AdminDashboard() {
   const [notifications, setNotifications] = useState(3);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.location.href = '/user';
+    logout();
   };
 
   const renderPage = () => {
@@ -1756,10 +1650,11 @@ export default function AdminDashboard() {
                 width: 32, height: 32, borderRadius: 9, background: "linear-gradient(135deg,#8B5CF6,#F43F8E)",
                 display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 800, flexShrink: 0,
               }}>{user?.avatar || (user?.username || user?.name || "A")[0].toUpperCase()}</div>
-              <div style={{ minWidth: 0 }}>
+              <div style={{ minWidth: 0, flex: 1 }}>
                 <div style={{ fontSize: 12, fontWeight: 600, color: C.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user?.username || user?.name || "Admin User"}</div>
                 <div style={{ fontSize: 10, color: C.muted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user.email}</div>
               </div>
+              <button onClick={() => window.location.reload()} title="Switch to User View" style={{ background: C.surface2, border: `1px solid ${C.border}`, color: C.muted, cursor: "pointer", fontSize: 12, padding: "4px 8px", borderRadius: 8 }}>🔄</button>
             </div>
           </div>
         )}

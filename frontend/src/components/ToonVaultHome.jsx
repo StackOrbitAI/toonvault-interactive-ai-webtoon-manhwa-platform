@@ -47,22 +47,7 @@ const GENRES = [
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun", "Completed"];
 
 const STORIES = [
-  { id: 1, title: "Crimson Throne", genre: "Romance Fantasy", cover: "💖", views: "28.8M", updated: true, rating: "4.9", mood: ["slow burn", "royalty"], day: "Mon", type: "comic", desc: "She escaped a kingdom that wanted her dead. He's the king who never forgot her face.", bg: "#FDE8F0" },
-  { id: 2, title: "The Shadow Pact", genre: "Fantasy", cover: "🌙", views: "9.8M", updated: true, rating: "4.8", mood: ["dark", "magic"], day: "Mon", type: "comic", desc: "Two enemies bound by a curse. One impossible choice.", bg: "#EDE8FA" },
-  { id: 3, title: "My Wavering Heart", genre: "Drama", cover: "🌊", views: "15.1K", updated: true, rating: "4.7", mood: ["angst", "realistic"], day: "Tue", type: "comic", desc: "What happens when the person you love stops trying?", bg: "#E8F0FD" },
-  { id: 4, title: "Primal Accord", genre: "Action Fantasy", cover: "⚔️", views: "7.7M", updated: true, rating: "4.6", mood: ["action", "found family"], day: "Tue", type: "comic", desc: "A monster hunter. A prophecy. A world on fire.", bg: "#FDF3E0" },
-  { id: 5, title: "Duchess Reborn", genre: "Romance Fantasy", cover: "👑", views: "2M", updated: false, rating: "4.9", mood: ["royalty", "revenge"], day: "Wed", type: "comic", desc: "She died once. This time, she rewrites the ending.", bg: "#F0FDE8" },
-  { id: 6, title: "Cinderella Protocol", genre: "Comedy Romance", cover: "✨", views: "2.7M", updated: true, rating: "4.5", mood: ["cozy", "funny"], day: "Wed", type: "comic", desc: "Fake dating the most oblivious CEO in the city.", bg: "#FEF3DC" },
-  { id: 7, title: "Villain's Beloved", genre: "Romance Fantasy", cover: "🌹", views: "10.1M", updated: true, rating: "4.8", mood: ["dark romance", "redemption"], day: "Thu", type: "comic", desc: "I romanced the villain once. Now he's real, and he remembers.", bg: "#FDE8F0" },
-  { id: 8, title: "Stray Signal", genre: "Sci-Fi", cover: "🛸", views: "3.3M", updated: true, rating: "4.7", mood: ["mystery", "suspense"], day: "Thu", type: "comic", desc: "A distress signal from 40 years ago. Someone is still broadcasting.", bg: "#E8F5FD" },
-  { id: 9, title: "Soft Apocalypse", genre: "Slice of Life", cover: "🌿", views: "1.6M", updated: false, rating: "4.6", mood: ["cozy", "wholesome"], day: "Fri", type: "novel", desc: "The world nearly ended. We opened a bakery anyway.", bg: "#EAF5E8" },
-  { id: 10, title: "Blood & Blossom", genre: "Supernatural", cover: "🌺", views: "5.6M", updated: true, rating: "4.8", mood: ["dark", "romance"], day: "Fri", type: "comic", desc: "A demon who falls in love smells like cherry blossoms and regret.", bg: "#FDE8F0" },
-  { id: 11, title: "The Tyrant's Thief", genre: "Historical Romance", cover: "🗡️", views: "4.2M", updated: true, rating: "4.7", mood: ["historical", "enemies-to-lovers"], day: "Sat", type: "comic", desc: "She stole from the emperor. He decided to keep her.", bg: "#F6F0E8" },
-  { id: 12, title: "Last Frequency", genre: "BL Romance", cover: "📻", views: "1.9M", updated: true, rating: "4.9", mood: ["soft", "slow burn"], day: "Sat", type: "novel", desc: "They met on a radio station no one listened to. Then everyone did.", bg: "#EDE8FA" },
-  { id: 13, title: "Iron Saint", genre: "Superhero Action", cover: "⚡", views: "6.1M", updated: false, rating: "4.6", mood: ["action", "heroic"], day: "Sun", type: "comic", desc: "Saving the world would be easier if the world wanted to be saved.", bg: "#FDF3E0" },
-  { id: 14, title: "Farm of the Forgotten", genre: "Romance Fantasy", cover: "🌻", views: "2.2M", updated: true, rating: "4.7", mood: ["cozy", "found family"], day: "Sun", type: "comic", desc: "Fated to die, she got a farm, a fairy, and far too much responsibility.", bg: "#F0FDE8" },
-  { id: 15, title: "Moonlit Conspiracy", genre: "Mystery Thriller", cover: "🌑", views: "3.8M", updated: true, rating: "4.8", mood: ["suspense", "mystery"], day: "Mon", type: "comic", desc: "Every witness said the same thing. None of them were there.", bg: "#1F2430", textLight: true },
-  { id: 16, title: "Wolf's Lullaby", genre: "GL Fantasy", cover: "🐺", views: "1.4M", updated: true, rating: "4.7", mood: ["fantasy", "GL"], day: "Tue", type: "novel", desc: "How hard could it be to look after one giant, chaotic wolf?", bg: "#EDE8FA" },
+  { title: "ToonVault Originals", subtitle: "Experience stories crafted by advanced AI.", genre: "AI Powered", badge: "NEW", bg: "linear-gradient(135deg, #3D1A5C 0%, #E8336D 100%)", cover: "✨" }
 ];
 
 const TRENDING_COLLECTIONS = [
@@ -73,9 +58,7 @@ const TRENDING_COLLECTIONS = [
 ];
 
 const FEATURED = [
-  { title: "Crimson Throne", subtitle: "She started a new life, but he's still living in the one she left.", genre: "Romance Fantasy", badge: "NEW ✨", bg: "linear-gradient(135deg, #3D1A5C 0%, #E8336D 60%, #C9922A 100%)", cover: "💖" },
-  { title: "The Shadow Pact", subtitle: "Two enemies bound by a curse that only love can break.", genre: "Fantasy", badge: "TRENDING", bg: "linear-gradient(135deg, #1A0A2E 0%, #4C2DB5 50%, #7B4FA6 100%)", cover: "🌙" },
-  { title: "Villain's Beloved", subtitle: "Fate destroyed their love. But fate is meant to be defied.", genre: "Dark Romance", badge: "EVENT 🎉", bg: "linear-gradient(135deg, #2D1A1A 0%, #8B1A3A 50%, #E86A8A 100%)", cover: "🌹" },
+  { title: "ToonVault Originals", subtitle: "Experience stories crafted by advanced AI.", genre: "AI Powered", badge: "NEW", bg: "linear-gradient(135deg, #3D1A5C 0%, #E8336D 100%)", cover: "✨" }
 ];
 
 function StoryCard({ story, size = "normal" }) {
@@ -104,7 +87,11 @@ function StoryCard({ story, size = "normal" }) {
         fontSize: size === "large" ? 60 : 48,
         position: "relative",
       }}>
-        <span>{story.cover}</span>
+        {String(story.cover || "").trim().includes("http") ? (
+          <img src={String(story.cover).trim()} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt={story.title} />
+        ) : (
+          <span>{story.cover || "📖"}</span>
+        )}
         {story.updated && (
           <span style={{
             position: "absolute", top: 8, left: 8,
@@ -195,7 +182,9 @@ function SectionHeader({ title, viewAll, sub }) {
         {sub && <p style={{ fontSize: 13, color: COLORS.muted, margin: "4px 0 0" }}>{sub}</p>}
       </div>
       {viewAll && (
-        <button style={{ fontSize: 13, color: COLORS.plum, fontWeight: 600, background: "none", border: "none", cursor: "pointer", padding: "4px 10px", borderRadius: 8, transition: "background 0.2s" }}
+        <button 
+          onClick={() => document.querySelector("#categories")?.scrollIntoView({ behavior: 'smooth' })}
+          style={{ fontSize: 13, color: COLORS.plum, fontWeight: 600, background: "none", border: "none", cursor: "pointer", padding: "4px 10px", borderRadius: 8, transition: "background 0.2s" }}
           onMouseEnter={e => e.currentTarget.style.background = COLORS.plumLight}
           onMouseLeave={e => e.currentTarget.style.background = "none"}
         >View all →</button>
@@ -208,13 +197,17 @@ export default function ToonVaultHome() {
   const navigate = useNavigate();
   const [activeDay, setActiveDay] = useState("Mon");
   const [activeGenre, setActiveGenre] = useState("all");
-  const [activeCategoryTab, setActiveCategoryTab] = useState("Drama");
+  const [activeCategoryTab, setActiveCategoryTab] = useState("All");
+  const [activeTrendingTab, setActiveTrendingTab] = useState("Trending");
   const [heroIndex, setHeroIndex] = useState(0);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchVal, setSearchVal] = useState("");
   const [searchResults, setSearchResults] = useState([]);
-  const [liveStories, setLiveStories] = useState(STORIES);
+  const [liveStories, setLiveStories] = useState([]);
+  const featuredStories = liveStories.length > 0 ? liveStories.slice(0, 5) : STORIES;
   const [showPopup, setShowPopup] = useState(false);
+  const [showAIModal, setShowAIModal] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState("");
   const [settings, setSettings] = useState({
     site_name: "ToonVault",
     maintenance_mode: "false",
@@ -227,6 +220,27 @@ export default function ToonVaultHome() {
   const scrollGenres = (dir) => {
     genreScrollRef.current?.scrollBy({ left: dir * 250, behavior: "smooth" });
   };
+
+  useEffect(() => {
+    axios.get('/api/stories')
+      .then(res => {
+        if (Array.isArray(res.data)) {
+          const mapped = res.data.map(s => ({
+            ...s,
+            id: s._id,
+            cover: s.panels && s.panels.length > 0 ? s.panels[0] : (s.coverIcon || "📖"),
+            bg: "linear-gradient(135deg, #121315 0%, #1A1B1E 100%)",
+            mood: s.genre ? [s.genre.toLowerCase()] : ["fantasy"],
+            day: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][Math.floor(Math.random() * 7)],
+            updated: true,
+            rating: s.rating || "4.9",
+            views: s.views > 1000 ? (s.views / 1000).toFixed(1) + "K" : s.views
+          }));
+          setLiveStories(mapped);
+        }
+      })
+      .catch(err => console.error("Error fetching stories:", err));
+  }, []);
 
   useEffect(() => {
     // Fetch all public settings
@@ -267,29 +281,11 @@ export default function ToonVaultHome() {
   }, [searchVal, liveStories]);
 
   useEffect(() => {
-    const t = setInterval(() => setHeroIndex(i => (i + 1) % FEATURED.length), 4000);
-    axios.get("/api/stories").then(r => {
-      if(r.data && r.data.length > 0) {
-        const fetched = r.data.map(s => ({
-          ...s, 
-          id: s._id, 
-          cover: s.coverIcon || "📖", 
-          bg: s.coverBg || "#EDE8FA", 
-          mood: [], 
-          day: "Mon", 
-          updated: s.status === "Live"
-        }));
-        setLiveStories([...fetched, ...STORIES]);
-      } else {
-        setLiveStories(STORIES);
-      }
-    }).catch(()=>{
-      setLiveStories(STORIES);
-    });
+    const t = setInterval(() => setHeroIndex(i => (i + 1) % (featuredStories.length || 1)), 6000);
     return () => clearInterval(t);
-  }, []);
+  }, [featuredStories.length]);
 
-  const categoryTabs = ["All", "Drama", "Fantasy", "Comedy", "Action", "Slice of life", "Romance", "Superhero", "Sci-fi"];
+  const categoryTabs = ["All", "Romance", "Fantasy", "Drama", "Action", "Comedy", "Thriller", "Sci-Fi", "Mystery", "Slice of Life"];
   
   useEffect(() => {
     if (activeGenre !== "all") {
@@ -313,7 +309,14 @@ export default function ToonVaultHome() {
   };
 
   const dailyStories = liveStories.filter(s => s.day === activeDay);
-  const featured = FEATURED[heroIndex];
+  const featured = featuredStories[heroIndex] || (featuredStories.length > 0 ? featuredStories[0] : (STORIES[0] || { 
+    title: "ToonVault Originals", 
+    subtitle: "Experience stories crafted by advanced AI.", 
+    genre: "AI Powered", 
+    badge: "NEW", 
+    bg: "linear-gradient(135deg, #3D1A5C 0%, #E8336D 100%)", 
+    cover: "✨" 
+  }));
 
   return (
     <div style={{ fontFamily: "'Inter', -apple-system, sans-serif", background: COLORS.bg, minHeight: "100vh", color: COLORS.ink }}>
@@ -409,7 +412,13 @@ export default function ToonVaultHome() {
                             onMouseEnter={e => e.currentTarget.style.background = COLORS.plumLight}
                             onMouseLeave={e => e.currentTarget.style.background = "white"}
                           >
-                            <div style={{ width: 32, height: 32, borderRadius: 6, background: s.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>{s.cover}</div>
+                            <div style={{ width: 40, height: 40, borderRadius: 6, background: "#f0f0f0", overflow: "hidden" }}>
+                              {s.cover?.startsWith('http') ? (
+                                <img src={s.cover} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                              ) : (
+                                <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>{s.cover || '📖'}</div>
+                              )}
+                            </div>
                             <div style={{ flex: 1 }}>
                               <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink }}>{s.title}</div>
                               <div style={{ fontSize: 11, color: COLORS.muted }}>{s.genre}</div>
@@ -442,12 +451,13 @@ export default function ToonVaultHome() {
               background: "transparent", borderRadius: 22, fontSize: 13,
               fontWeight: 600, color: COLORS.plum, cursor: "pointer",
             }}>Log in</button>
-            <button onClick={() => navigate('/dashboard?open=story')} style={{
+            <button onClick={() => setShowAIModal(true)} style={{
               padding: "9px 20px", border: "none",
               background: `linear-gradient(135deg, ${COLORS.plum}, ${COLORS.plumDark})`,
               borderRadius: 22, fontSize: 13, fontWeight: 600, color: "white",
               cursor: "pointer", boxShadow: "0 2px 10px rgba(109,74,232,0.3)",
-            }}>✏️ Write Story</button>
+              display: "flex", alignItems: "center", gap: 6
+            }}><span>✨</span> Become ToonVault Creator</button>
           </div>
         </div>
 
@@ -502,21 +512,28 @@ export default function ToonVaultHome() {
                   padding: "12px 28px", background: "white", color: COLORS.plum,
                   border: "none", borderRadius: 24, fontSize: 14, fontWeight: 700, cursor: "pointer",
                 }}>▶ Start reading</button>
-                <button onClick={() => navigate('/dashboard?open=story')} style={{
+                <button onClick={() => setShowAIModal(true)} style={{
                   padding: "12px 24px", background: `linear-gradient(135deg, ${COLORS.plum}, ${COLORS.rose})`,
                   color: "white", border: "none",
                   borderRadius: 24, fontSize: 14, fontWeight: 600, cursor: "pointer",
-                  boxShadow: "0 4px 14px rgba(232,106,138,0.4)"
-                }}>✏️ Create Story</button>
+                  boxShadow: "0 4px 14px rgba(232,106,138,0.4)",
+                  display: "flex", alignItems: "center", gap: 8
+                }}><span>✨</span> Become ToonVault Creator</button>
               </div>
             </div>
-            <div style={{ fontSize: 120, opacity: 0.4, position: "absolute", right: 60, bottom: -10, filter: "blur(1px)", userSelect: "none" }}>{featured.cover}</div>
+            <div style={{ position: "absolute", right: 60, top: "10%", bottom: "10%", width: 280, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1 }}>
+              {String(featured.cover || "").trim().includes("http") ? (
+                <img src={String(featured.cover).trim()} style={{ height: "100%", borderRadius: 16, boxShadow: "0 20px 40px rgba(0,0,0,0.3)", transform: "rotate(3deg)" }} />
+              ) : (
+                <div style={{ fontSize: 120, opacity: 0.4, filter: "blur(1px)" }}>{featured.cover}</div>
+              )}
+            </div>
             <div style={{ position: "absolute", right: 180, top: -40, width: 200, height: 200, borderRadius: "50%", background: "rgba(255,255,255,0.07)" }} />
             <div style={{ position: "absolute", right: 100, bottom: -60, width: 260, height: 260, borderRadius: "50%", background: "rgba(255,255,255,0.05)" }} />
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 14, justifyContent: "center" }}>
-            {FEATURED.map((f, i) => (
+            {featuredStories.map((f, i) => (
               <button key={i} onClick={() => setHeroIndex(i)} style={{
                 width: i === heroIndex ? 28 : 8, height: 8,
                 borderRadius: 6, border: "none", cursor: "pointer", transition: "all 0.3s",
@@ -550,17 +567,27 @@ export default function ToonVaultHome() {
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18 }}>
             <h2 style={{ fontSize: 20, fontWeight: 700, color: COLORS.ink, margin: 0 }}>🔥 Trending & Popular</h2>
             {["Trending", "Popular", "New"].map(tab => (
-              <button key={tab} style={{
-                padding: "5px 14px", border: `1px solid ${COLORS.border}`,
-                background: tab === "Trending" ? COLORS.plum : COLORS.card,
-                color: tab === "Trending" ? "white" : COLORS.muted,
-                borderRadius: 16, fontSize: 12, fontWeight: 500, cursor: "pointer",
-              }}>{tab}</button>
+              <button key={tab} 
+                onClick={() => setActiveTrendingTab(tab)}
+                style={{
+                  padding: "5px 14px", border: `1px solid ${COLORS.border}`,
+                  background: activeTrendingTab === tab ? COLORS.plum : COLORS.card,
+                  color: activeTrendingTab === tab ? "white" : COLORS.muted,
+                  borderRadius: 16, fontSize: 12, fontWeight: 500, cursor: "pointer",
+                  transition: "all 0.2s"
+                }}>{tab}</button>
             ))}
-            <button style={{ marginLeft: "auto", fontSize: 13, color: COLORS.plum, fontWeight: 600, background: "none", border: "none", cursor: "pointer" }}>View all →</button>
+            <button 
+              onClick={() => document.querySelector("#rankings")?.scrollIntoView({ behavior: 'smooth' })}
+              style={{ marginLeft: "auto", fontSize: 13, color: COLORS.plum, fontWeight: 600, background: "none", border: "none", cursor: "pointer" }}
+            >View all →</button>
           </div>
           <HorizontalScroll>
-            {liveStories.slice(0, 10).map(s => <StoryCard key={s.id} story={s} size="large" />)}
+            {liveStories.filter(s => {
+              if (activeTrendingTab === "New") return s.badge === "NEW" || true; // Just a mock for now
+              if (activeTrendingTab === "Popular") return parseFloat(s.rating) > 4.5;
+              return true; // Trending as default
+            }).slice(0, 10).map(s => <StoryCard key={s.id} story={s} size="large" />)}
           </HorizontalScroll>
         </section>
 
@@ -580,7 +607,11 @@ export default function ToonVaultHome() {
             ))}
           </div>
           <HorizontalScroll>
-            {liveStories.filter(s => activeCategoryTab === "All" || s.genre?.toLowerCase().includes(activeCategoryTab.toLowerCase())).map(s => <StoryCard key={s.id} story={s} />)}
+            {liveStories.filter(s => {
+              if (activeCategoryTab === "All") return true;
+              const genreStr = Array.isArray(s.genre) ? s.genre.join(' ') : (s.genre || "");
+              return genreStr.toLowerCase().includes(activeCategoryTab.toLowerCase());
+            }).map(s => <StoryCard key={s.id} story={s} />)}
           </HorizontalScroll>
         </section>
 
@@ -601,6 +632,45 @@ export default function ToonVaultHome() {
                 <div style={{ fontSize: 28, marginBottom: 8 }}>{c.emoji}</div>
                 <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.ink, marginBottom: 4 }}>{c.label}</div>
                 <div style={{ fontSize: 12, color: COLORS.muted }}>{c.desc}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ═══ TOP RANKING ═══ */}
+        <section id="ranking" style={{ marginBottom: 44, scrollMarginTop: 80 }}>
+          <SectionHeader title="🏆 Top Ranking" sub="The most read stories this week" viewAll />
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 20 }}>
+            {liveStories.slice(0, 3).map((s, i) => (
+              <div key={s.id} onClick={() => navigate(`/story/${s.id}`)} style={{
+                display: "flex", gap: 16, background: COLORS.card, borderRadius: 16, 
+                padding: "12px", border: `1px solid ${COLORS.border}`, cursor: "pointer",
+                transition: "all 0.2s"
+              }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = COLORS.plum}
+              onMouseLeave={e => e.currentTarget.style.borderColor = COLORS.border}
+              >
+                <div style={{ position: "relative", width: 80, height: 110, borderRadius: 10, overflow: "hidden", background: s.bg, flexShrink: 0 }}>
+                   <div style={{ 
+                     position: "absolute", top: 0, left: 0, padding: "2px 8px", 
+                     background: i === 0 ? COLORS.gold : i === 1 ? "#A1A1AA" : "#CD7F32",
+                     color: "white", fontSize: 16, fontWeight: 900, borderBottomRightRadius: 10 
+                   }}>{i + 1}</div>
+                   <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32 }}>
+                     {String(s.cover || "").trim().includes("http") ? (
+                       <img src={String(s.cover).trim()} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                     ) : s.cover}
+                   </div>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                  <div style={{ fontSize: 11, color: COLORS.rose, fontWeight: 700, textTransform: "uppercase", marginBottom: 4 }}>{s.genre}</div>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: COLORS.ink, marginBottom: 6 }}>{s.title}</div>
+                  <div style={{ fontSize: 12, color: COLORS.muted, marginBottom: 8, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{s.description}</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 12, color: COLORS.mutedLight }}>
+                    <span>👁 {s.views}</span>
+                    <span>⭐ {s.rating}</span>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
@@ -635,36 +705,7 @@ export default function ToonVaultHome() {
             </div>
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(155px, 1fr))", gap: 14 }}>
-              {dailyStories.map(s => (
-                <div key={s.id} style={{
-                  background: COLORS.card, borderRadius: 14, border: `1px solid ${COLORS.border}`,
-                  overflow: "hidden", cursor: "pointer", transition: "transform 0.2s",
-                }}
-                  onClick={() => navigate(`/story/${s.id}`)}
-                  onMouseEnter={e => e.currentTarget.style.transform = "translateY(-3px)"}
-                  onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}
-                >
-                  <div style={{
-                    height: 130, background: s.bg || COLORS.plumLight,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 44, position: "relative",
-                  }}>
-                    {s.cover}
-                    {s.updated && (
-                      <span style={{
-                        position: "absolute", top: 7, left: 7,
-                        background: COLORS.rose, color: "white",
-                        fontSize: 9, fontWeight: 700, padding: "2px 6px", borderRadius: 5,
-                      }}>UP</span>
-                    )}
-                  </div>
-                  <div style={{ padding: "10px 11px" }}>
-                    <div style={{ fontSize: 10, color: COLORS.rose, fontWeight: 600, marginBottom: 2 }}>{s.genre}</div>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: COLORS.ink, marginBottom: 4, lineHeight: 1.3 }}>{s.title}</div>
-                    <div style={{ fontSize: 11, color: COLORS.mutedLight }}>👁 {s.views}</div>
-                  </div>
-                </div>
-              ))}
+              {dailyStories.map(s => <StoryCard key={s.id} story={s} size="small" />)}
             </div>
           )}
         </section>
@@ -694,8 +735,13 @@ export default function ToonVaultHome() {
                 </div>
                 <div style={{
                   width: 42, height: 54, borderRadius: 8, flexShrink: 0,
-                  background: s.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20,
-                }}>{s.cover}</div>
+                  background: s.bg, display: "flex", alignItems: "center", justifyContent: "center", 
+                  fontSize: 20, overflow: "hidden"
+                }}>
+                  {String(s.cover || "").trim().includes("http") ? (
+                    <img src={String(s.cover).trim()} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  ) : s.cover}
+                </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, marginBottom: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.title}</div>
                   <div style={{ fontSize: 11, color: COLORS.muted }}>{s.genre}</div>
@@ -765,7 +811,7 @@ export default function ToonVaultHome() {
                 ))}
               </div>
             </div>
-            <button style={{
+            <button onClick={() => setShowAIModal(true)} style={{
               position: "relative", zIndex: 1,
               padding: "14px 32px", background: COLORS.plum, color: "white",
               border: "none", borderRadius: 28, fontSize: 15, fontWeight: 700,
@@ -784,18 +830,10 @@ export default function ToonVaultHome() {
           
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24 }}>
             {[
-              {
-                name: "Free", price: "0", accent: COLORS.muted, bg: "white",
-                features: ["1,000+ free episodes", "Basic customization", "Daily free passes", "Community access"]
-              },
-              {
-                name: "Silver", price: "9.99", accent: COLORS.plum, bg: COLORS.plumLight, popular: true,
-                features: ["Ad-free reading", "Unlimited episodes", "Early access", "Offline reading", "Profile badge"]
-              },
-              {
-                name: "Gold", price: "19.99", accent: COLORS.gold, bg: COLORS.goldLight,
-                features: ["Everything in Silver", "Direct creator support", "Gold-only stories", "Monthly coin bonus", "HD art downloads"]
-              }
+              { name: "Free", price: "0", accent: COLORS.muted, bg: COLORS.card, features: ["Read 10 stories/mo", "5 AI Generations", "Community access", "Standard reading"] },
+              { name: "Bronze", price: "4.99", accent: COLORS.plum, bg: COLORS.plumLight+"10", features: ["Read 50 stories/mo", "20 AI Generations", "Advanced AI tools", "No ads", "Offline reading"] },
+              { name: "Silver", price: "9.99", accent: COLORS.rose, bg: COLORS.roseLight+"10", popular: true, features: ["Read 100 stories/mo", "50 AI Generations", "Priority AI gen", "Early access", "Custom themes"] },
+              { name: "Gold", price: "19.99", accent: COLORS.gold, bg: COLORS.goldLight+"10", features: ["Unlimited reading", "Unlimited AI Generations", "Pro AI studio", "Direct support", "Exclusive content"] }
             ].map((plan, i) => (
               <div key={i} style={{
                 background: plan.bg, borderRadius: 24, padding: "36px 30px",
@@ -919,90 +957,158 @@ export default function ToonVaultHome() {
       {showPopup && (
         <div style={{
           position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
-          background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)",
+          background: "rgba(0,0,0,0.8)", backdropFilter: "blur(12px)",
           display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999,
           padding: 20
         }}>
-          <div style={{
-            background: "linear-gradient(135deg, #0A0910 0%, #1A1730 100%)",
-            borderRadius: 28, width: "100%", maxWidth: 660, padding: "32px 48px",
-            position: "relative", border: "1px solid rgba(139,92,246,0.3)",
-            boxShadow: "0 32px 90px rgba(0,0,0,0.6), inset 0 0 80px rgba(139,92,246,0.05)",
-            textAlign: "center"
+          <div onClick={e => e.stopPropagation()} style={{
+            background: "#08090A", border: "1px solid rgba(255,255,255,0.1)",
+            borderRadius: 32, width: "100%", maxWidth: 900, display: "flex",
+            position: "relative", textAlign: "center", overflow: "hidden",
+            boxShadow: "0 40px 100px rgba(0,0,0,0.8)",
           }}>
-            {/* Close Button */}
-            <button onClick={() => setShowPopup(false)} style={{
-              position: "absolute", top: 20, right: 20, background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.6)", width: 36, height: 36, borderRadius: 18,
-              fontSize: 18, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-              transition: "all 0.2s"
-            }}
-              onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.1)"; e.currentTarget.style.color = "white"; }}
-              onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; e.currentTarget.style.color = "rgba(255,255,255,0.6)"; }}
-            >×</button>
-            
-            <div style={{
-              width: 64, height: 64, borderRadius: 20, margin: "0 auto 20px",
-              background: "linear-gradient(135deg, #8B5CF6, #F43F8E)",
-              display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32,
-              boxShadow: "0 10px 28px rgba(139,92,246,0.35)"
-            }}>✍️</div>
-            
-            <h2 style={{ fontSize: 28, fontWeight: 800, color: "white", margin: "0 0 12px", letterSpacing: -0.5 }}>
-              Become a ToonVault Creator
-            </h2>
-            <p style={{ fontSize: 15, color: "rgba(255,255,255,0.75)", margin: "0 auto 28px", lineHeight: 1.5, maxWidth: 500 }}>
-              Unleash your imagination and share your worlds with millions. Whether it's a breathtaking comic or an immersive novel, your audience is waiting.
-            </p>
-
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 32, textAlign: "left" }}>
-              {[
-                { icon: "💰", title: "Monetize Day One", desc: "Earn royalties immediately." },
-                { icon: "🎨", title: "AI Panels", desc: "Generate stunning art with AI." },
-                { icon: "👥", title: "Global Audience", desc: "Reach millions of readers instantly." },
-                { icon: "📊", title: "Creator Analytics", desc: "Track your story views and growth." }
-              ].map((feat, idx) => (
-                <div key={idx} style={{
-                  background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)",
-                  borderRadius: 16, padding: "14px 18px", display: "flex", gap: 12, alignItems: "center",
-                  transition: "background 0.2s"
-                }}
-                  onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.06)"}
-                  onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.03)"}
-                >
-                  <div style={{ fontSize: 24 }}>{feat.icon}</div>
-                  <div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: "white", marginBottom: 2 }}>{feat.title}</div>
-                    <div style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", lineHeight: 1.3 }}>{feat.desc}</div>
-                  </div>
-                </div>
-              ))}
+            {/* Left Side: Dynamic Preview */}
+            <div style={{ flex: 1, position: "relative", background: "#121315", overflow: "hidden", minHeight: 450, display: window.innerWidth > 768 ? "block" : "none" }}>
+               <div style={{
+                 position: "absolute", inset: 0, 
+                 backgroundImage: `url(${featured.cover && String(featured.cover).includes('http') ? featured.cover.trim() : 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23'})`,
+                 backgroundSize: "cover", backgroundPosition: "center",
+                 filter: "brightness(0.6)", transition: "all 1s ease"
+               }} />
+               <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, #08090A 10%, transparent 90%)" }} />
+               <div style={{ position: "absolute", bottom: 40, left: 30, right: 30, textAlign: "left" }}>
+                 <div style={{ fontSize: 11, color: COLORS.rose, fontWeight: 700, textTransform: "uppercase", marginBottom: 8, letterSpacing: 1 }}>Top Trending Preview</div>
+                 <div style={{ fontSize: 24, fontWeight: 900, color: "white", marginBottom: 6 }}>{featured.title}</div>
+                 <div style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", lineHeight: 1.5, marginBottom: 16, display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{featured.subtitle || featured.description}</div>
+                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: "50%", background: COLORS.plum, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>✨</div>
+                    <div style={{ fontSize: 13, color: "white", fontWeight: 600 }}>By ToonVault AI Creator</div>
+                 </div>
+               </div>
             </div>
-            
-            <button onClick={() => navigate('/dashboard?open=story')} style={{
-              width: "100%", padding: "16px", border: "none",
-              background: "linear-gradient(135deg, #8B5CF6, #F43F8E)",
-              borderRadius: 16, fontSize: 16, fontWeight: 700, color: "white", letterSpacing: 0.5,
-              cursor: "pointer", boxShadow: "0 8px 24px rgba(139,92,246,0.3)",
-              transition: "transform 0.2s, box-shadow 0.2s"
-            }}
-              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 12px 32px rgba(139,92,246,0.4)"; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 8px 24px rgba(139,92,246,0.3)"; }}
-            >
-              Start Writing Now 🚀
-            </button>
-            <button onClick={() => setShowPopup(false)} style={{
-              background: "none", border: "none", color: "rgba(255,255,255,0.4)",
-              fontSize: 13, marginTop: 20, cursor: "pointer", transition: "color 0.2s"
-            }}
-              onMouseEnter={e => e.currentTarget.style.color = "white"}
-              onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.4)"}
-            >
-              I'll explore first
-            </button>
+
+            {/* Right Side: Content */}
+            <div style={{ flex: 1, padding: "48px 40px", position: "relative" }}>
+              <button onClick={() => setShowPopup(false)} style={{
+                position: "absolute", top: 20, right: 20, background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.6)", width: 32, height: 32, borderRadius: 16,
+                fontSize: 16, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                transition: "all 0.2s", zIndex: 10
+              }}
+                onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.1)"; e.currentTarget.style.color = "white"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; e.currentTarget.style.color = "rgba(255,255,255,0.6)"; }}
+              >×</button>
+              
+              <div style={{
+                width: 52, height: 52, borderRadius: 16, margin: "0 auto 16px",
+                background: "linear-gradient(135deg, #8B5CF6, #F43F8E)",
+                display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26,
+                boxShadow: "0 10px 24px rgba(139,92,246,0.3)"
+              }}>✍️</div>
+              
+              <h2 style={{ fontSize: 24, fontWeight: 800, color: "white", margin: "0 0 10px", letterSpacing: -0.5 }}>
+                Become a ToonVault Creator
+              </h2>
+              <p style={{ fontSize: 14, color: "rgba(255,255,255,0.65)", margin: "0 auto 24px", lineHeight: 1.5 }}>
+                Share your worlds with millions. Whether it's a comic or an immersive novel, your audience is waiting.
+              </p>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 28, textAlign: "left" }}>
+                {[
+                  { icon: "💰", title: "Monetize Day One", desc: "Earn royalties now." },
+                  { icon: "🎨", title: "AI Panels", desc: "Generate art with AI." },
+                  { icon: "👥", title: "Global Reach", desc: "Reach millions instantly." },
+                  { icon: "📊", title: "Live Analytics", desc: "Track your story growth." }
+                ].map((feat, idx) => (
+                  <div key={idx} style={{
+                    background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)",
+                    borderRadius: 14, padding: "12px", display: "flex", gap: 10, alignItems: "center",
+                  }}>
+                    <div style={{ fontSize: 20 }}>{feat.icon}</div>
+                    <div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: "white", marginBottom: 1 }}>{feat.title}</div>
+                      <div style={{ fontSize: 10, color: "rgba(255,255,255,0.5)", lineHeight: 1.2 }}>{feat.desc}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              <button onClick={() => navigate('/dashboard?page=stories')} style={{
+                width: "100%", padding: "15px", border: "none",
+                background: "linear-gradient(135deg, #8B5CF6, #F43F8E)",
+                borderRadius: 14, fontSize: 15, fontWeight: 700, color: "white",
+                cursor: "pointer", boxShadow: "0 8px 24px rgba(139,92,246,0.25)",
+                transition: "transform 0.2s"
+              }}
+                onMouseEnter={e => e.currentTarget.style.transform = "translateY(-2px)"}
+                onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}
+              >
+                Become ToonVault Creator 🚀
+              </button>
+              <button onClick={() => setShowPopup(false)} style={{
+                background: "none", border: "none", color: "rgba(255,255,255,0.35)",
+                fontSize: 12, marginTop: 16, cursor: "pointer", transition: "color 0.2s"
+              }}
+                onMouseEnter={e => e.currentTarget.style.color = "white"}
+                onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.35)"}
+              >I'll explore first</button>
+            </div>
           </div>
         </div>
       )}
+      {/* ═══ AI INSTRUCTION MODAL ═══ */}
+      {showAIModal && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 3000, background: "rgba(0,0,0,0.85)", backdropFilter: "blur(12px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+          <div style={{ background: "white", borderRadius: 32, width: "100%", maxWidth: 600, overflow: "hidden", position: "relative", boxShadow: "0 30px 60px rgba(0,0,0,0.4)" }}>
+            <div style={{ height: 160, background: `linear-gradient(135deg, ${COLORS.plum}, ${COLORS.rose})`, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: "white" }}>
+              <div style={{ fontSize: 44, marginBottom: 10 }}>🎀</div>
+              <h2 style={{ fontSize: 24, fontWeight: 900, margin: 0 }}>Manta AI Story Creator</h2>
+              <p style={{ fontSize: 14, opacity: 0.8 }}>Turn your ideas into professional webtoons</p>
+            </div>
+            <div style={{ padding: 40 }}>
+              <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 15, color: COLORS.ink }}>What's your story about?</h3>
+              <textarea 
+                value={aiPrompt}
+                onChange={e => setAiPrompt(e.target.value)}
+                placeholder="e.g. A princess who discovers she can talk to dragons in a kingdom of ice..."
+                style={{ width: "100%", height: 120, borderRadius: 16, border: `2px solid ${COLORS.border}`, padding: 20, fontSize: 15, outline: "none", fontFamily: "inherit", resize: "none", transition: "all 0.3s" }}
+                onFocus={e => e.currentTarget.style.borderColor = COLORS.plum}
+                onBlur={e => e.currentTarget.style.borderColor = COLORS.border}
+              />
+              <div style={{ marginTop: 25, display: "flex", gap: 12 }}>
+                <button onClick={() => setShowAIModal(false)} style={{ flex: 1, padding: "16px", borderRadius: 16, border: `2px solid ${COLORS.border}`, background: "none", color: COLORS.muted, fontWeight: 700, cursor: "pointer" }}>Cancel</button>
+                <button 
+                  onClick={() => {
+                    const user = JSON.parse(localStorage.getItem('user'));
+                    if(!user) navigate('/user');
+                    else navigate('/dashboard?page=ai&prompt=' + encodeURIComponent(aiPrompt));
+                  }}
+                  style={{ flex: 2, padding: "16px", borderRadius: 16, background: `linear-gradient(135deg, ${COLORS.plum}, ${COLORS.plumDark})`, color: "white", border: "none", fontWeight: 700, cursor: "pointer", boxShadow: `0 8px 20px ${COLORS.plum}44` }}
+                >
+                  ✨ Start AI Generation
+                </button>
+              </div>
+              <p style={{ fontSize: 12, color: COLORS.muted, textAlign: "center", marginTop: 20 }}>Using <strong>Runware Flux AI</strong> · High Fidelity Manta Style</p>
+            </div>
+            <button onClick={() => setShowAIModal(false)} style={{ position: "absolute", top: 15, right: 15, width: 32, height: 32, borderRadius: "50%", background: "rgba(0,0,0,0.2)", border: "none", color: "white", cursor: "pointer", fontSize: 18 }}>×</button>
+          </div>
+        </div>
+      )}
+
+      {/* ═══ FLOATING AI BUTTON ═══ */}
+      <button onClick={() => setShowAIModal(true)} style={{
+        position: "fixed", bottom: 30, right: 30, width: 70, height: 70,
+        borderRadius: "50%", background: `linear-gradient(135deg, ${COLORS.plum}, ${COLORS.rose})`,
+        border: "none", color: "white", fontSize: 28, cursor: "pointer",
+        boxShadow: "0 10px 30px rgba(109,74,232,0.4)", zIndex: 1000,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        transition: "all 0.3s",
+      }}
+      onMouseEnter={e => e.currentTarget.style.transform = "scale(1.1) rotate(10deg)"}
+      onMouseLeave={e => e.currentTarget.style.transform = "scale(1) rotate(0deg)"}
+      >
+        ✨
+      </button>
     </div>
   );
 }

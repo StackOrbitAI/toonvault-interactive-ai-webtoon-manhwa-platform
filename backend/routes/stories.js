@@ -140,43 +140,63 @@ router.post('/generate', auth, async (req, res) => {
     const { topic, prompt, images, category, status } = req.body;
     
     try {
-        // 1. Generate Story Text using Mistral
+        // 1. Generate Narrative & Prompts using Mistral
         const mistralResp = await axios.post('https://api.mistral.ai/v1/chat/completions', {
             model: "mistral-small-latest",
             messages: [{
+                role: "system",
+                content: "You are a webtoon story writer. Output ONLY a JSON object with: title, description, and an array 'panels' (length 5) where each item has 'text' (dialogue/narration) and 'imagePrompt' (detailed visual description for Flux AI)."
+            }, {
                 role: "user",
-                content: `Write a short toon story about "${topic}". ${prompt ? `Context: ${prompt}` : ''}. 
-                Provide a title and a 3-sentence summary.`
-            }]
+                content: `Create a Manta-style webtoon story about: ${topic}. ${prompt ? `Context: ${prompt}` : ''}`
+            }],
+            response_format: { type: "json_object" }
         }, { headers: { 'Authorization': `Bearer ${process.env.MISTRAL_API_KEY}` } });
 
-        const storyText = mistralResp.data.choices[0].message.content;
+        const aiOutput = JSON.parse(mistralResp.data.choices[0].message.content);
+        const { title, description, panels: storyPanels } = aiOutput;
 
-        // 2. Generate Images using Runware (Simplified mock for now as Runware is async/ws heavy, but using REST if available)
-        // For now, let's use a placeholder or assume a REST endpoint
-        const panels = [];
-        for (let i = 0; i < (images || 3); i++) {
-            // In a real implementation, we'd call Runware here
-            panels.push(`https://images.runware.ai/v1/mock-panel-${i}.png`);
-        }
+        // 2. Generate Images using Runware (FLUX.1 [schnell])
+        const runwareTasks = storyPanels.map((p, idx) => ({
+            taskType: "imageInference",
+            taskUUID: `panel-${idx}-${Date.now()}`,
+            model: process.env.RUNWARE_MODEL || "runware:31@1", // Flux Schnell
+            positivePrompt: `manga style, webtoon aesthetic, high quality, colorful, ${p.imagePrompt}`,
+            width: 512,
+            height: 768,
+            numberResults: 1,
+            outputFormat: "JPG",
+            CFGScale: 3.5,
+            steps: 4
+        }));
+
+        const runwareResp = await axios.post('https://api.runware.ai/v1', runwareTasks, {
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        // Runware returns a list of results for each task
+        const imageUrls = runwareResp.data.data
+            .filter(d => d.taskType === "imageInference")
+            .map(d => d.imageURL);
 
         const newStory = new Story({
-            title: topic || "Untitled Story",
-            genre: category,
+            title: title || topic || "Untitled Story",
+            genre: category || "Fantasy",
             authorId: req.user.id,
             authorName: req.user.username || "Creator",
             status: status === 'published' ? 'Live' : 'Draft',
             type: 'Comic',
-            description: storyText,
-            panels: panels,
-            coverIcon: "🎨"
+            description: description,
+            content: JSON.stringify(storyPanels), // Store the dialogue too
+            panels: imageUrls,
+            coverIcon: "✨"
         });
 
         await newStory.save();
         res.json({ message: "Story generated successfully!", story: newStory });
     } catch (err) {
         console.error("AI Generation Error:", err.response?.data || err.message);
-        res.status(500).json({ error: "Failed to generate story with AI" });
+        res.status(500).json({ error: "Failed to generate story with AI. " + (err.response?.data?.message || err.message) });
     }
 });
 

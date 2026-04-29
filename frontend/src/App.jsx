@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { HelmetProvider } from 'react-helmet-async';
 import ToonVaultHome from './components/ToonVaultHome';
 import Reader from './components/Reader';
+import MantaReader from './components/MantaReader';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import Login from './components/Login';
 import ToonVaultUserDashboard from './components/ToonVaultUserDashboard';
@@ -37,6 +38,7 @@ function App() {
           
           {/* Public Reader */}
           <Route path="/story/:storyId" element={<Reader />} />
+          <Route path="/manta/:storyId" element={<MantaReader />} />
           
           {/* Auth */}
           <Route path="/user" element={<Login type="user" />} />
