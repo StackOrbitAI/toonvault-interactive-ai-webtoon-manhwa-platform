@@ -195,11 +195,11 @@ export default function MantaReader() {
           {story.displayPanels?.map((url, i) => (
             <motion.div
               key={i}
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.6 }}
-              style={{ width: "100%", position: "relative" }}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true, margin: "0px" }}
+              transition={{ duration: 0.8 }}
+              style={{ width: "100%", position: "relative", marginBottom: -1 }}
             >
               <img
                 src={url}

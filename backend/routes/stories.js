@@ -143,11 +143,11 @@ router.post('/generate', auth, async (req, res) => {
     try {
         const systemPrompt = category === "Quotes" 
             ? "You are a creator of aesthetic and deep quotes. Output ONLY a JSON object with: title (collection name), description, and an array 'panels' (length 5) where each item has 'text' (a beautiful quote) and 'imagePrompt' (a minimalist, aesthetic background description matching the quote's mood)."
-            : "You are an adult webtoon story writer specializing in mature, steamy romance and drama. Output ONLY a JSON object with: title, description, and an array 'panels' (length 5) where each item has 'text' (dialogue/narration) and 'imagePrompt' (detailed visual description for Flux AI).";
+            : "You are a professional Manhwa (webtoon) writer. Output ONLY a JSON object with: title, description, and an array 'panels' (length 10) where each item has 'text' (poetic narrative or dialogue) and 'imagePrompt' (high-end Manhwa style, cinematic lighting, 8k, detailed character features, atmospheric backgrounds).";
 
         const userPrompt = category === "Quotes"
             ? `Create a collection of 5 deep aesthetic quotes about: ${topic}. ${prompt ? `Style/Vibe: ${prompt}` : ''}`
-            : `Create a highly mature Manta-style webtoon story about: ${topic}. It can include steamy or sensual themes. ${prompt ? `Context: ${prompt}` : ''}`;
+            : `Create a professional 10-panel Manhwa episode about: ${topic}. Style: Sexy, Mature, Intense. ${prompt ? `Context: ${prompt}` : ''}`;
 
         // 1. Generate Narrative & Prompts using Mistral
         const mistralResp = await axios.post('https://api.mistral.ai/v1/chat/completions', {
@@ -171,10 +171,10 @@ router.post('/generate', auth, async (req, res) => {
             ...storyPanels.map((p, idx) => ({
                 taskType: "imageInference",
                 taskUUID: crypto.randomUUID(),
-                model: process.env.RUNWARE_MODEL || "runware:100@1", 
+                model: "runware:100@1", 
                 positivePrompt: category === "Quotes" 
                     ? `masterpiece, minimalist aesthetic, cinematic photography, high contrast, clean, elegant, ${p.imagePrompt}`
-                    : `masterpiece, best quality, ultra-detailed, beautiful manhwa style, steamy mature romance webtoon aesthetic, rich vibrant colors, cinematic lighting, ${p.imagePrompt}`,
+                    : `masterpiece, highly detailed Manhwa style, beautiful anime aesthetic, cinematic lighting, intricate textures, 8k resolution, ${p.imagePrompt}`,
                 width: 512,
                 height: 768,
                 numberResults: 1,
