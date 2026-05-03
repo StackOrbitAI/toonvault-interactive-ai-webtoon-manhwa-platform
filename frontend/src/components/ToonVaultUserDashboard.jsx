@@ -1,10 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { api, getStoredUser, logout } from "../api";
+import api, { getStoredUser, logout } from "../api";
+import AIStoryWizard from "./AIStoryWizard";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
-import { Sparkles, Image as ImageIcon, Book, Zap, Rocket, Plus } from 'lucide-react';
-import AIGenerationPopup from './AIGenerationPopup';
 
 // ═══════════════════════════════════════════════════════
 // DESIGN TOKENS
@@ -174,7 +173,7 @@ function StatPill({ icon, label, value, color = C.plum }) {
 // ═══════════════════════════════════════════════════════
 // TOP NAV
 // ═══════════════════════════════════════════════════════
-function TopNav({ page, setPage, user = {}, onMenuClick }) {
+function TopNav({ page, setPage, user = {}, onMenuClick, setShowWizard }) {
   const [notifs, setNotifs] = useState(3);
   const avatarLetter = (user.username || user.name || "U")[0].toUpperCase();
   return (
@@ -225,7 +224,7 @@ function TopNav({ page, setPage, user = {}, onMenuClick }) {
       <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
         {/* Publish Button */}
         <button 
-          onClick={() => { setPage('ai'); }}
+          onClick={() => { setShowWizard(true); }}
           className="publish-btn hide-mobile"
           style={{
             padding: "8px 18px", borderRadius: 12,
@@ -489,7 +488,7 @@ function HomePage({ setPage, user = {}, myStories = [], allStories = [] }) {
           </p>
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
             <button 
-              onClick={() => setIsAIPopupOpen(true)}
+              onClick={() => setPage('ai')}
               style={{
                 padding: "12px 28px", borderRadius: 24,
                 background: C.gradient, border: "none",
@@ -1595,7 +1594,7 @@ export default function ToonVaultUserDashboard() {
   const [loadingData, setLoadingData] = useState(true);
   const [initialPrompt, setInitialPrompt] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isAIPopupOpen, setIsAIPopupOpen] = useState(false);
+  const [showWizard, setShowWizard] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -1710,7 +1709,16 @@ export default function ToonVaultUserDashboard() {
         }
       `}</style>
 
-      <TopNav page={page} setPage={setPage} user={user} onMenuClick={() => setMobileMenuOpen(true)} />
+      <TopNav page={page} setPage={setPage} user={user} onMenuClick={() => setMobileMenuOpen(true)} setShowWizard={setShowWizard} />
+      
+      <AIStoryWizard 
+        isOpen={showWizard} 
+        onClose={() => setShowWizard(false)} 
+        onFinish={(story) => {
+          setShowWizard(false);
+          setPage('ai'); // Go to AI Studio to see/edit it
+        }}
+      />
 
       <div style={{ display: "flex", paddingTop: 62 }}>
         <div className={`sidebar ${mobileMenuOpen ? 'open' : ''}`}>
@@ -1739,14 +1747,6 @@ export default function ToonVaultUserDashboard() {
           ) : PAGES[page]}
         </main>
       </div>
-      <AIGenerationPopup 
-        isOpen={isAIPopupOpen} 
-        onClose={() => setIsAIPopupOpen(false)} 
-        onComplete={() => {
-          setIsAIPopupOpen(false);
-          refreshStories();
-        }} 
-      />
     </div>
   );
 }

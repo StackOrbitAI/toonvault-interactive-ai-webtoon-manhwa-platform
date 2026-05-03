@@ -3,8 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { api, logout } from "../../api";
-import AIGenerationPopup from "../../components/AIGenerationPopup";
-import { Sparkles, Wand2, Rocket, Plus } from 'lucide-react';
+import AIStoryWizard from "../../components/AIStoryWizard";
 
 // ═══════════════════════════════════════════════════════
 //  DESIGN TOKENS
@@ -659,7 +658,7 @@ function UsersPage() {
 // ═══════════════════════════════════════════════════════
 //  STORIES PAGE
 // ═══════════════════════════════════════════════════════
-function StoriesPage({ onOpenAIPopup }) {
+function StoriesPage() {
   const [stories, setStories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -690,20 +689,10 @@ function StoriesPage({ onOpenAIPopup }) {
           <div style={{ fontSize: 22, fontWeight: 800, color: C.text }}>Stories Management</div>
           <div style={{ fontSize: 13, color: C.muted, marginTop: 3 }}>{stories.length} stories in platform</div>
         </div>
-        <div style={{ display: "flex", gap: 12 }}>
-          <button onClick={onOpenAIPopup} style={{
-            padding: "9px 18px", borderRadius: 10, background: `linear-gradient(135deg, ${C.plum}, ${C.rose})`,
-            border: "none", color: "white", fontSize: 13, fontWeight: 700,
-            cursor: "pointer", display: "flex", alignItems: "center", gap: 8,
-            boxShadow: `0 4px 12px rgba(139,92,246,0.2)`
-          }}>
-            <Sparkles size={16} /> Publish with AI
-          </button>
-          <div style={{ position: "relative" }}>
-            <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: C.muted }}>🔍</span>
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search stories..."
-              style={{ padding: "9px 14px 9px 36px", background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 10, fontSize: 13, color: C.text, outline: "none", width: 220 }} />
-          </div>
+        <div style={{ position: "relative" }}>
+          <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: C.muted }}>🔍</span>
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search stories..."
+            style={{ padding: "9px 14px 9px 36px", background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 10, fontSize: 13, color: C.text, outline: "none", width: 220 }} />
         </div>
       </div>
 
@@ -1617,7 +1606,6 @@ export default function AdminDashboard() {
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isAIPopupOpen, setIsAIPopupOpen] = useState(false);
 
   const handleFinishStory = async () => {
     setIsGenerating(true);
@@ -1656,7 +1644,7 @@ export default function AdminDashboard() {
     switch (page) {
       case "dashboard": return <DashboardPage setPage={setPage} />;
       case "users": return <UsersPage />;
-      case "stories": return <StoriesPage onOpenAIPopup={() => setIsAIPopupOpen(true)} />;
+      case "stories": return <StoriesPage />;
       case "revenue": return <RevenuePage />;
       case "analytics": return <AnalyticsPage />;
       case "imagegen": return <ImageGenPage apiKeys={apiKeys} />;
@@ -1928,122 +1916,13 @@ export default function AdminDashboard() {
         }
       `}</style>
       {/* ═══ GENERATION WIZARD MODAL ═══ */}
-      {showGenWizard && (
-        <div style={{
-          position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
-          background: "rgba(0,0,0,0.85)", backdropFilter: "blur(12px)",
-          display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999,
-          padding: 20
-        }}>
-          <div style={{
-            background: C.surface, borderRadius: 24, width: "100%", maxWidth: 500,
-            padding: 32, border: `1px solid ${C.border}`, boxShadow: "0 24px 64px rgba(0,0,0,0.5)"
-          }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-              <div style={{ fontSize: 18, fontWeight: 800, color: C.text }}>
-                {genStep === 1 ? "Step 1: Core Concept" : "Step 2: Configuration"}
-              </div>
-              <button onClick={() => setShowGenWizard(false)} style={{ background: "none", border: "none", color: C.muted, cursor: "pointer", fontSize: 20 }}>✕</button>
-            </div>
-
-            <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
-              {[1, 2].map(s => (
-                <div key={s} style={{ height: 4, flex: 1, borderRadius: 2, background: s <= genStep ? C.plum : C.border }} />
-              ))}
-            </div>
-
-            {genStep === 1 ? (
-              <div>
-                <div style={{ fontSize: 12, fontWeight: 700, color: C.muted, marginBottom: 8, letterSpacing: 0.5 }}>STORY TOPIC / TITLE</div>
-                <input 
-                  type="text" 
-                  value={genData.topic} 
-                  onChange={e => setGenData({...genData, topic: e.target.value})}
-                  placeholder="The Cyberpunk Samurai's Vow" 
-                  style={{ width: "100%", padding: "14px 18px", background: C.bg, border: `1px solid ${C.border}`, borderRadius: 14, color: C.text, fontSize: 14, marginBottom: 22 }}
-                />
-
-                <div style={{ fontSize: 12, fontWeight: 700, color: C.muted, marginBottom: 8, letterSpacing: 0.5 }}>STORY PREMISE (OPTIONAL)</div>
-                <textarea 
-                  value={genData.prompt}
-                  onChange={e => setGenData({...genData, prompt: e.target.value})}
-                  placeholder="Briefly describe the plot or characters..." 
-                  style={{ width: "100%", height: 110, padding: "14px 18px", background: C.bg, border: `1px solid ${C.border}`, borderRadius: 14, color: C.text, fontSize: 14, resize: "none" }}
-                />
-
-                <button 
-                  onClick={() => setGenStep(2)}
-                  disabled={!genData.topic}
-                  style={{ width: "100%", marginTop: 28, padding: "16px", background: C.plum, color: "white", border: "none", borderRadius: 14, fontWeight: 800, cursor: "pointer", opacity: genData.topic ? 1 : 0.5 }}
-                >
-                  Configure Options →
-                </button>
-              </div>
-            ) : (
-              <div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 24 }}>
-                  <div>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: C.muted, marginBottom: 8 }}>AI PANELS</div>
-                    <select 
-                      value={genData.images}
-                      onChange={e => setGenData({...genData, images: parseInt(e.target.value)})}
-                      style={{ width: "100%", padding: "12px", background: C.bg, border: `1px solid ${C.border}`, borderRadius: 12, color: C.text }}
-                    >
-                      {[1, 3, 5, 8, 12].map(n => <option key={n} value={n}>{n} Panels</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: C.muted, marginBottom: 8 }}>CATEGORY</div>
-                    <select 
-                      value={genData.category}
-                      onChange={e => setGenData({...genData, category: e.target.value})}
-                      style={{ width: "100%", padding: "12px", background: C.bg, border: `1px solid ${C.border}`, borderRadius: 12, color: C.text }}
-                    >
-                      {GENRES_LIST.map(g => <option key={g} value={g}>{g}</option>)}
-                    </select>
-                  </div>
-                </div>
-
-                <div style={{ fontSize: 11, fontWeight: 700, color: C.muted, marginBottom: 10 }}>STORY STATUS</div>
-                <div style={{ display: "flex", gap: 12, marginBottom: 30 }}>
-                  {["draft", "published", "pending"].map(s => (
-                    <button 
-                      key={s}
-                      onClick={() => setGenData({...genData, status: s})}
-                      style={{ 
-                        flex: 1, padding: "12px", borderRadius: 12, border: `1px solid ${genData.status === s ? C.plum : C.border}`,
-                        background: genData.status === s ? `${C.plum}15` : "transparent",
-                        color: genData.status === s ? C.plum : C.muted,
-                        fontSize: 12, fontWeight: 700, cursor: "pointer", textTransform: "capitalize"
-                      }}
-                    >{s}</button>
-                  ))}
-                </div>
-
-                <div style={{ display: "flex", gap: 14 }}>
-                  <button onClick={() => setGenStep(1)} style={{ flex: 1, padding: "16px", background: "none", border: `1px solid ${C.border}`, color: C.muted, borderRadius: 14, fontWeight: 700, cursor: "pointer" }}>Back</button>
-                  <button 
-                    onClick={handleFinishStory}
-                    disabled={isGenerating}
-                    style={{ flex: 2, padding: "16px", background: `linear-gradient(135deg, ${C.plum}, ${C.rose})`, color: "white", border: "none", borderRadius: 14, fontWeight: 800, cursor: "pointer" }}
-                  >
-                    {isGenerating ? "Processing AI..." : "🚀 Launch Generation"}
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-      <AIGenerationPopup 
-        isOpen={isAIPopupOpen} 
-        onClose={() => setIsAIPopupOpen(false)} 
-        onComplete={() => {
-          setIsAIPopupOpen(false);
-          // Force refresh stories page if active
-          setPage("dashboard");
-          setTimeout(() => setPage("stories"), 50);
-        }} 
+      <AIStoryWizard 
+        isOpen={showGenWizard} 
+        onClose={() => setShowGenWizard(false)} 
+        onFinish={() => {
+          setShowGenWizard(false);
+          setPage("stories");
+        }}
       />
     </div>
   );
