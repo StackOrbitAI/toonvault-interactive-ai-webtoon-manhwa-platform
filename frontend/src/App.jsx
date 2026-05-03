@@ -9,6 +9,7 @@ import Login from './components/Login';
 import ToonVaultUserDashboard from './components/ToonVaultUserDashboard';
 import Browse from './components/Browse';
 import BecomeCreator from './components/BecomeCreator';
+import InfoPage from './components/InfoPage';
 import './App.css';
 
 // Simple Protected Route
@@ -54,6 +55,12 @@ function App() {
           <Route path="/" element={<ToonVaultHome />} />
           <Route path="/browse" element={<Browse />} />
           <Route path="/creators" element={<BecomeCreator />} />
+          <Route path="/info/:slug" element={<InfoPage />} />
+          <Route path="/about" element={<Navigate to="/info/about" replace />} />
+          <Route path="/help" element={<Navigate to="/info/help" replace />} />
+          <Route path="/terms" element={<Navigate to="/info/terms" replace />} />
+          <Route path="/privacy" element={<Navigate to="/info/privacy" replace />} />
+          <Route path="/community" element={<Navigate to="/info/community" replace />} />
           
           {/* Public Reader */}
           <Route path="/story/:storyId" element={<Reader />} />

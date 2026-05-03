@@ -215,9 +215,9 @@ export default function BecomeCreator() {
       <footer style={{ padding: '60px', borderTop: `1px solid ${C.cardBorder}`, textAlign: 'center', color: C.textDim, fontSize: 14 }}>
         <p>© 2026 ToonVault Creator Program. All rights reserved.</p>
         <div style={{ marginTop: 12, display: 'flex', justifyContent: 'center', gap: 20 }}>
-          <span>Privacy Policy</span>
-          <span>Terms of Service</span>
-          <span>Help Center</span>
+          <span onClick={() => navigate('/privacy')} style={{ cursor: 'pointer' }}>Privacy Policy</span>
+          <span onClick={() => navigate('/terms')} style={{ cursor: 'pointer' }}>Terms of Service</span>
+          <span onClick={() => navigate('/help')} style={{ cursor: 'pointer' }}>Help Center</span>
         </div>
       </footer>
 

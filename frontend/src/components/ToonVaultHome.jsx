@@ -1084,11 +1084,11 @@ export default function ToonVaultHome() {
               { 
                 title: "Company", 
                 links: [
-                  { l: "About", t: "#about" },
-                  { l: "Help center", t: "#help" },
-                  { l: "Community", t: "#community" },
-                  { l: "Terms", t: "#" },
-                  { l: "Privacy", t: "#" }
+                  { l: "About", t: "/about" },
+                  { l: "Help center", t: "/help" },
+                  { l: "Community", t: "/community" },
+                  { l: "Terms", t: "/terms" },
+                  { l: "Privacy", t: "/privacy" }
                 ] 
               },
             ].map(col => (
