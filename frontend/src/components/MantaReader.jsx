@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { motion, useScroll, useSpring } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Share2, Heart, MessageSquare, BookOpen, Star, MoreVertical, List, ThumbsUp, Flame, ShieldAlert, Bookmark } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Share2, Heart, MessageSquare, BookOpen, Star, MoreVertical, List, ThumbsUp, Flame, ShieldAlert, Bookmark, ArrowRight, Sparkles } from 'lucide-react';
 import axios from 'axios';
 
 const COLORS = {
