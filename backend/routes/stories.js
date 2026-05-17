@@ -207,7 +207,7 @@ router.post('/generate', auth, async (req, res) => {
 
             const runwareResp = await axios.post('https://api.runware.ai/v1', runwareTasks, {
                 headers: { 'Content-Type': 'application/json' },
-                timeout: 10000
+                timeout: 60000
             });
 
             if (runwareResp.data && runwareResp.data.data) {
@@ -347,7 +347,7 @@ router.post('/generate-episode', auth, async (req, res) => {
 
             const runwareResp = await axios.post('https://api.runware.ai/v1', runwareTasks, {
                 headers: { 'Content-Type': 'application/json' },
-                timeout: 10000
+                timeout: 60000
             });
 
             if (runwareResp.data && runwareResp.data.data) {
