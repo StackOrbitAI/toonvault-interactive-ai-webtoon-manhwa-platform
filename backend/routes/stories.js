@@ -147,7 +147,7 @@ router.post('/generate', auth, async (req, res) => {
 
         const userPrompt = category === "Quotes"
             ? `Curate a masterpiece collection of 5 deep, aesthetic quotes focused on: "${topic}". Theme details: ${prompt || 'Universal wisdom'}. Ensure the quotes are unique and impactful.`
-            : `Draft a high-stakes, professionally structured 10-panel Manhwa pilot episode about: "${topic}". Tone: Mature, Sexy, Intense Drama. Plot hooks: ${prompt || 'A fateful encounter'}. Focus on visual storytelling and emotional tension.`;
+            : `Draft a high-stakes, professionally structured 10-panel Manhwa pilot episode about: "${topic}". Tone: Dramatic, High-Fantasy, Epic. Plot hooks: ${prompt || 'A fateful encounter'}. Focus on visual storytelling, dynamic action, and emotional tension.`;
 
         // 1. Generate Narrative & Prompts using Mistral
         const mistralResp = await axios.post('https://api.mistral.ai/v1/chat/completions', {
@@ -165,40 +165,58 @@ router.post('/generate', auth, async (req, res) => {
         const aiOutput = JSON.parse(mistralResp.data.choices[0].message.content);
         const { title, description, panels: storyPanels } = aiOutput;
 
-        // 2. Generate Images using Runware (FLUX.1 [schnell])
-        const runwareTasks = [
-            { taskType: "authentication", apiKey: process.env.RUNWARE_API_KEY },
-            ...storyPanels.map((p, idx) => ({
-                taskType: "imageInference",
-                taskUUID: crypto.randomUUID(),
-                model: "runware:100@1", 
-                positivePrompt: category === "Quotes" 
+        // 2. Generate Images using Runware (FLUX.1 [schnell]) with robust fallback
+        let imageUrls = [];
+        try {
+            if (!process.env.RUNWARE_API_KEY) {
+                throw new Error("No Runware API Key provided in .env");
+            }
+            const runwareTasks = [
+                { taskType: "authentication", apiKey: process.env.RUNWARE_API_KEY },
+                ...storyPanels.map((p, idx) => ({
+                    taskType: "imageInference",
+                    taskUUID: crypto.randomUUID(),
+                    model: "civitai:257749@290640", 
+                    positivePrompt: category === "Quotes" 
+                        ? `masterpiece, minimalist aesthetic, cinematic photography, high contrast, clean, elegant, ${p.imagePrompt}`
+                        : `score_9, score_8_up, score_7_up, masterpiece, best quality, beautiful manhwa style, dramatic webtoon aesthetic, rich vibrant colors, safe for work, ${p.imagePrompt}`,
+                    width: 512,
+                    height: 768,
+                    numberResults: 1,
+                    outputFormat: "JPG",
+                    seed: Math.floor(Math.random() * 2147483647),
+                    CFGScale: 7.0,
+                    steps: 25
+                }))
+            ];
+
+            const runwareResp = await axios.post('https://api.runware.ai/v1', runwareTasks, {
+                headers: { 'Content-Type': 'application/json' },
+                timeout: 10000
+            });
+
+            if (runwareResp.data && runwareResp.data.data) {
+                imageUrls = runwareResp.data.data
+                    .filter(d => d.taskType === "imageInference" && d.imageURL)
+                    .map(d => d.imageURL);
+            }
+
+            if (imageUrls.length === 0) {
+                const errors = runwareResp.data?.errors || [];
+                throw new Error("Runware returned no images. Errors: " + JSON.stringify(errors));
+            }
+            console.log(`🎨 Successfully generated ${imageUrls.length} images using Runware API.`);
+        } catch (runwareError) {
+            console.warn("⚠️ Runware API call failed. Falling back to high-fidelity AI Image engine (Pollinations AI):", runwareError.message);
+            
+            // Fallback: Generate Pollinations AI URLs which generate images on-the-fly
+            imageUrls = storyPanels.map((p, idx) => {
+                const cleanPrompt = category === "Quotes"
                     ? `masterpiece, minimalist aesthetic, cinematic photography, high contrast, clean, elegant, ${p.imagePrompt}`
-                    : `masterpiece, highly detailed Manhwa style, beautiful anime aesthetic, cinematic lighting, intricate textures, 8k resolution, ${p.imagePrompt}`,
-                width: 512,
-                height: 768,
-                numberResults: 1,
-                outputFormat: "JPG",
-                CFGScale: 3.5,
-                steps: 4
-            }))
-        ];
-
-        const runwareResp = await axios.post('https://api.runware.ai/v1', runwareTasks, {
-            headers: { 'Content-Type': 'application/json' }
-        });
-
-        // Runware returns a list of results for each task
-        if (!runwareResp.data || !runwareResp.data.data) {
-            throw new Error("Invalid response from Runware API: " + JSON.stringify(runwareResp.data));
-        }
-
-        const imageUrls = runwareResp.data.data
-            .filter(d => d.taskType === "imageInference" && d.imageURL)
-            .map(d => d.imageURL);
-
-        if (imageUrls.length === 0) {
-            throw new Error("No images were generated by Runware. Errors: " + JSON.stringify(runwareResp.data.errors || []));
+                    : `masterpiece, highly detailed Manhwa style, beautiful anime aesthetic, cinematic lighting, intricate textures, 8k resolution, ${p.imagePrompt}`;
+                const seed = Math.floor(Math.random() * 1000000);
+                return `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt)}?width=512&height=768&nologo=true&seed=${seed}`;
+            });
         }
 
         const newStory = new Story({
@@ -278,7 +296,7 @@ router.post('/generate-episode', auth, async (req, res) => {
             model: "mistral-small-latest",
             messages: [{
                 role: "system",
-                content: "You are a professional Manhwa scriptwriter specializing in high-tension drama and mature romance. Your task is to write the NEXT episode of an existing series. Ensure narrative continuity, character development, and emotional impact. Output ONLY a JSON object with: episodeTitle, and an array 'panels' (length 10) where each item has 'text' (dialogue/narration) and 'imagePrompt' (detailed cinematic description for the artist)."
+                content: "You are a professional Manhwa scriptwriter specializing in high-tension drama and fantasy. Your task is to write the NEXT episode of an existing series. Ensure narrative continuity, character development, and emotional impact. Output ONLY a JSON object with: episodeTitle, and an array 'panels' (length 10) where each item has 'text' (dialogue/narration) and 'imagePrompt' (detailed cinematic description for the artist). CRITICAL: Every panel must have a unique, distinct 'imagePrompt' that varies in composition."
             }, {
                 role: "user",
                 content: context
@@ -289,37 +307,54 @@ router.post('/generate-episode', auth, async (req, res) => {
         const aiOutput = JSON.parse(mistralResp.data.choices[0].message.content);
         const { episodeTitle, panels: storyPanels } = aiOutput;
 
-        // 2. Generate Images
-        const runwareTasks = [
-            { taskType: "authentication", apiKey: process.env.RUNWARE_API_KEY },
-            ...storyPanels.map((p, idx) => ({
-                taskType: "imageInference",
-                taskUUID: crypto.randomUUID(),
-                model: "runware:100@1",
-                positivePrompt: `masterpiece, best quality, ultra-detailed, beautiful manhwa style, steamy mature romance webtoon aesthetic, rich vibrant colors, cinematic lighting, ${p.imagePrompt}`,
-                width: 512,
-                height: 768,
-                numberResults: 1,
-                outputFormat: "JPG",
-                CFGScale: 3.5,
-                steps: 4
-            }))
-        ];
+        // 2. Generate Images with robust fallback
+        let imageUrls = [];
+        try {
+            if (!process.env.RUNWARE_API_KEY) {
+                throw new Error("No Runware API Key provided in .env");
+            }
+            const runwareTasks = [
+                { taskType: "authentication", apiKey: process.env.RUNWARE_API_KEY },
+                ...storyPanels.map((p, idx) => ({
+                    taskType: "imageInference",
+                    taskUUID: crypto.randomUUID(),
+                    model: "civitai:257749@290640",
+                    positivePrompt: `score_9, score_8_up, score_7_up, masterpiece, best quality, beautiful manhwa style, dramatic webtoon aesthetic, rich vibrant colors, safe for work, ${p.imagePrompt}`,
+                    width: 512,
+                    height: 768,
+                    numberResults: 1,
+                    outputFormat: "JPG",
+                    seed: Math.floor(Math.random() * 2147483647),
+                    CFGScale: 7.0,
+                    steps: 25
+                }))
+            ];
 
-        const runwareResp = await axios.post('https://api.runware.ai/v1', runwareTasks, {
-            headers: { 'Content-Type': 'application/json' }
-        });
+            const runwareResp = await axios.post('https://api.runware.ai/v1', runwareTasks, {
+                headers: { 'Content-Type': 'application/json' },
+                timeout: 10000
+            });
 
-        if (!runwareResp.data || !runwareResp.data.data) {
-            throw new Error("Invalid response from Runware API: " + JSON.stringify(runwareResp.data));
-        }
+            if (runwareResp.data && runwareResp.data.data) {
+                imageUrls = runwareResp.data.data
+                    .filter(d => d.taskType === "imageInference" && d.imageURL)
+                    .map(d => d.imageURL);
+            }
 
-        const imageUrls = runwareResp.data.data
-            .filter(d => d.taskType === "imageInference" && d.imageURL)
-            .map(d => d.imageURL);
-
-        if (imageUrls.length === 0) {
-            throw new Error("No images were generated by Runware. Errors: " + JSON.stringify(runwareResp.data.errors || []));
+            if (imageUrls.length === 0) {
+                const errors = runwareResp.data?.errors || [];
+                throw new Error("Runware returned no images. Errors: " + JSON.stringify(errors));
+            }
+            console.log(`🎨 Successfully generated ${imageUrls.length} next episode images using Runware API.`);
+        } catch (runwareError) {
+            console.warn("⚠️ Runware API call failed for next episode. Falling back to high-fidelity AI Image engine (Pollinations AI):", runwareError.message);
+            
+            // Fallback: Generate Pollinations AI URLs which generate images on-the-fly
+            imageUrls = storyPanels.map((p, idx) => {
+                const cleanPrompt = `masterpiece, best quality, ultra-detailed, beautiful manhwa style, dramatic immersive webtoon aesthetic, safe for work, rich vibrant colors, cinematic lighting, ${p.imagePrompt}`;
+                const seed = Math.floor(Math.random() * 1000000);
+                return `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt)}?width=512&height=768&nologo=true&seed=${seed}`;
+            });
         }
 
         const episodeNumber = (story.episodes?.length || 0) + 2; 

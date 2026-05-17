@@ -728,6 +728,10 @@ function MyStoriesPage({ myStories = [], refreshStories, navigate }) {
   const [newStory, setNewStory] = useState({ title: "", genre: "", description: "", type: "Comic" });
   const [deleting, setDeleting] = useState(null);
   const [genEp, setGenEp] = useState(null); // storyId
+  const [showEpisodeModal, setShowEpisodeModal] = useState(false);
+  const [selectedStoryForEpisode, setSelectedStoryForEpisode] = useState(null);
+  const [episodePromptText, setEpisodePromptText] = useState("");
+  const [generatingEpisode, setGeneratingEpisode] = useState(false);
   const filters = ["All", "Live", "Draft", "Pending", "Flagged"];
 
   const filtered = filter === "All" ? (myStories || []) : (myStories || []).filter(s => s.status === filter);
@@ -753,18 +757,26 @@ function MyStoriesPage({ myStories = [], refreshStories, navigate }) {
     finally { setDeleting(null); }
   };
 
-  const handleAddEpisode = async (s) => {
-    const prompt = window.prompt(`Next episode for "${s.title}":\nWhat should happen next? (Leave blank for AI choice)`);
-    if (prompt === null) return;
-    
-    setGenEp(s._id || s.id);
+  const handleAddEpisode = (s) => {
+    setSelectedStoryForEpisode(s);
+    setEpisodePromptText("");
+    setShowEpisodeModal(true);
+  };
+
+  const submitGenerateEpisode = async () => {
+    if (!selectedStoryForEpisode) return;
+    const storyId = selectedStoryForEpisode._id || selectedStoryForEpisode.id;
+    setGeneratingEpisode(true);
+    setGenEp(storyId);
     try {
-      await api.generateEpisode(s._id || s.id, prompt);
+      await api.generateEpisode(storyId, episodePromptText);
       alert("Next episode generated successfully!");
+      setShowEpisodeModal(false);
       if (refreshStories) await refreshStories();
     } catch (e) {
       alert("Failed: " + (e.response?.data?.error || e.message));
     } finally {
+      setGeneratingEpisode(false);
       setGenEp(null);
     }
   };
@@ -814,6 +826,34 @@ function MyStoriesPage({ myStories = [], refreshStories, navigate }) {
             <div style={{ display: "flex", gap: 10 }}>
               <button onClick={() => setShowCreate(false)} style={{ flex: 1, padding: "12px", borderRadius: 14, background: C.glass, border: `1px solid ${C.glassBorder}`, color: C.textMuted, cursor: "pointer" }}>Cancel</button>
               <button onClick={handleCreate} disabled={creating} style={{ flex: 2, padding: "12px", borderRadius: 14, background: C.gradient, border: "none", color: "white", fontWeight: 700, cursor: creating ? "default" : "pointer", opacity: creating ? 0.7 : 1 }}>{creating ? "Creating..." : `Become ${settings.site_name || 'ToonVault'} Creator`}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Next Episode Modal */}
+      {showEpisodeModal && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ background: C.card, border: `1px solid ${C.cardBorder}`, borderRadius: 24, padding: 32, width: 480, boxShadow: "0 20px 60px rgba(0,0,0,0.5)" }}>
+            <div style={{ fontSize: 18, fontWeight: 800, marginBottom: 8, color: C.text }}>✨ Generate Next Episode</div>
+            <div style={{ fontSize: 13, color: C.textDim, marginBottom: 20 }}>Story: <span style={{ color: C.plumLight, fontWeight: 600 }}>{selectedStoryForEpisode?.title}</span></div>
+            
+            <div style={{ marginBottom: 20 }}>
+              <label style={{ fontSize: 11, color: C.textDim, fontWeight: 700, letterSpacing: 0.5, display: "block", marginBottom: 6 }}>WHAT SHOULD HAPPEN NEXT?</label>
+              <textarea 
+                value={episodePromptText} 
+                onChange={e => setEpisodePromptText(e.target.value)} 
+                rows={4}
+                placeholder="Describe the plot twist, dialogue, or narrative goals for the next episode. (Leave blank for AI choice)"
+                style={{ width: "100%", background: C.bg, border: `1px solid ${C.cardBorder}`, borderRadius: 12, padding: "10px 14px", color: C.text, fontSize: 13, resize: "vertical", outline: "none", fontFamily: "inherit", boxSizing: "border-box" }} 
+              />
+            </div>
+            
+            <div style={{ display: "flex", gap: 10 }}>
+              <button onClick={() => setShowEpisodeModal(false)} style={{ flex: 1, padding: "12px", borderRadius: 14, background: C.glass, border: `1px solid ${C.glassBorder}`, color: C.textMuted, cursor: "pointer" }}>Cancel</button>
+              <button onClick={submitGenerateEpisode} disabled={generatingEpisode} style={{ flex: 2, padding: "12px", borderRadius: 14, background: C.gradient, border: "none", color: "white", fontWeight: 700, cursor: generatingEpisode ? "default" : "pointer", opacity: generatingEpisode ? 0.7 : 1 }}>
+                {generatingEpisode ? "Generating Episode..." : "✦ Generate Episode"}
+              </button>
             </div>
           </div>
         </div>
