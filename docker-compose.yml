@@ -69,6 +69,18 @@ services:
     networks:
       - toonvault_net
 
+  graphify:
+    build:
+      context: .
+      dockerfile: Dockerfile.graphify
+    restart: always
+    volumes:
+      - .:/app
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    networks:
+      - toonvault_net
+
 networks:
   toonvault_net:
     driver: bridge

@@ -153,16 +153,24 @@ router.get('/live/ranking', async (req, res) => {
 
 // AI Generation Route for Stories (Toon Panels)
 router.post('/generate', auth, async (req, res) => {
-    const { topic, prompt, images, category, status } = req.body;
+    const { topic, prompt, images, category, genre, status } = req.body;
+    const finalCategory = category || genre;
+    const finalTopic = topic || prompt?.slice(0, 40) || "Late Night Train Romance";
     
     try {
-        const systemPrompt = category === "Quotes" 
-            ? "You are a world-class creator of aesthetic wisdom. Your output MUST be a JSON object with: title, description, and an array 'panels' (length 5). Each panel must have 'text' (a profound quote) and 'imagePrompt' (unique, minimalist cinematic photography for Flux, each with a different setting)."
-            : "You are an elite Manhwa (webtoon) writer. Your output MUST be a JSON object with: title, description, and an array 'panels' (length 10). CRITICAL: Write for a seamless vertical scroll format. Use very short, punchy dialogue. Every panel must have a unique, distinct 'imagePrompt' (establishing shots, extreme close-ups, dynamic action) to ensure a professional Webtoon flow. Avoid visual repetition.";
+        let systemPrompt = "";
+        let userPrompt = "";
 
-        const userPrompt = category === "Quotes"
-            ? `Curate a masterpiece collection of 5 deep, aesthetic quotes focused on: "${topic}". Theme details: ${prompt || 'Universal wisdom'}. Ensure the quotes are unique and impactful.`
-            : `Draft a high-stakes, professionally structured 10-panel Webtoon/Manhwa pilot episode about: "${topic}". Tone: Dramatic, High-Fantasy, Epic. Plot hooks: ${prompt || 'A fateful encounter'}. Focus on cinematic visual storytelling, fast pacing, and emotional tension.`;
+        if (finalCategory === "Quotes") {
+            systemPrompt = "You are a world-class creator of aesthetic wisdom. Your output MUST be a JSON object with: title, description, and an array 'panels' (length 5). Each panel must have 'text' (a profound quote) and 'imagePrompt' (unique, minimalist cinematic photography for Flux, each with a different setting).";
+            userPrompt = `Curate a masterpiece collection of 5 deep, aesthetic quotes focused on: "${finalTopic}". Theme details: ${prompt || 'Universal wisdom'}. Ensure the quotes are unique and impactful.`;
+        } else if (finalCategory?.toLowerCase() === "romance") {
+            systemPrompt = "You are a master of emotional, fluttering slice-of-life Romance Manhwa (webtoon) writing, similar to 'My Bias Gets on the Last Train'. Your output MUST be a JSON object with: title, description, and an array 'panels' (length 10). Write for a seamless vertical scroll format. Every panel must contain: 'speaker' (either 'Narration' for profound, poetic, aesthetic quotes that set the romantic mood, or a character's name like 'Mira' or 'Arin' for short, emotional, punchy dialogue), 'text' (the dialogue or poetic quote - ensure it is extremely professional, deep, and heartwarming), and 'imagePrompt' (a unique, extremely detailed visual description for the FLUX model focusing on high-fidelity, dreamlike anime/manhwa art styles, romantic cinematic lighting like teal & rose late-night glow, rainy train station, soft reflections, golden dawn, clean linework, and safe-for-work content. Make each composition distinct like establishing wide shots, intimate close-ups, over-the-shoulder perspectives to ensure a professional webtoon flow without visual repetition).";
+            userPrompt = `Draft a fluttering, heartwarming 10-panel late-night Romance Webtoon pilot episode about: "${finalTopic}". Theme details and plot hooks: ${prompt || 'A fateful commute meeting under rainy lights'}. Focus on cinematic visual storytelling, soft romantic tension, deep quotes, and relatable character dynamics.`;
+        } else {
+            systemPrompt = "You are an elite Manhwa (webtoon) writer. Your output MUST be a JSON object with: title, description, and an array 'panels' (length 10). CRITICAL: Write for a seamless vertical scroll format. Use very short, punchy dialogue. Every panel must have a unique, distinct 'imagePrompt' (establishing shots, extreme close-ups, dynamic action) to ensure a professional Webtoon flow. Avoid visual repetition.";
+            userPrompt = `Draft a high-stakes, professionally structured 10-panel Webtoon/Manhwa pilot episode about: "${finalTopic}". Tone: Dramatic, High-Fantasy, Epic. Plot hooks: ${prompt || 'A fateful encounter'}. Focus on cinematic visual storytelling, fast pacing, and emotional tension.`;
+        }
 
         // 1. Generate Narrative & Prompts using Mistral
         const mistralResp = await axios.post('https://api.mistral.ai/v1/chat/completions', {
@@ -192,7 +200,7 @@ router.post('/generate', auth, async (req, res) => {
                     taskType: "imageInference",
                     taskUUID: crypto.randomUUID(),
                     model: "runware:100@1",
-                    positivePrompt: category === "Quotes" 
+                    positivePrompt: finalCategory === "Quotes" 
                         ? `masterpiece, minimalist aesthetic, cinematic photography, high contrast, moody lighting, elegant atmosphere, ultra-detailed, ${p.imagePrompt}`
                         : `score_9, score_8_up, masterpiece, best quality, beautiful manhwa webtoon art, official webtoon style, dynamic composition, dramatic cinematic lighting, highly detailed character design, clean linework, ${p.imagePrompt}`,
                     width: 512,
@@ -226,7 +234,7 @@ router.post('/generate', auth, async (req, res) => {
             
             // Fallback: Generate Pollinations AI URLs which generate images on-the-fly
             imageUrls = storyPanels.map((p, idx) => {
-                const cleanPrompt = category === "Quotes"
+                const cleanPrompt = finalCategory === "Quotes"
                     ? `masterpiece, minimalist aesthetic, cinematic photography, high contrast, clean, elegant, ${p.imagePrompt}`
                     : `masterpiece, highly detailed Manhwa style, beautiful anime aesthetic, cinematic lighting, intricate textures, 8k resolution, ${p.imagePrompt}`;
                 const seed = Math.floor(Math.random() * 1000000);
@@ -234,10 +242,10 @@ router.post('/generate', auth, async (req, res) => {
             });
         }
 
-        const isMature = category?.toLowerCase() === 'mature' || (req.body.status === 'published' && category?.toLowerCase() === 'mature');
+        const isMature = finalCategory?.toLowerCase() === 'mature' || (req.body.status === 'published' && finalCategory?.toLowerCase() === 'mature');
         const newStory = new Story({
-            title: title || topic || "Untitled Story",
-            genre: category || "Fantasy",
+            title: title || finalTopic || "Untitled Story",
+            genre: finalCategory || "Fantasy",
             authorId: req.user.id,
             authorName: req.user.username || "Creator",
             status: status === 'published' ? 'Live' : 'Draft',

@@ -271,6 +271,7 @@ export default function MantaReader() {
   const [story, setStory] = useState(null);
   const [loading, setLoading] = useState(true);
   const [liked, setLiked] = useState(false);
+  const [showUI, setShowUI] = useState(true);
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const epNum = parseInt(queryParams.get('ep')) || 1;
@@ -381,11 +382,12 @@ export default function MantaReader() {
 
       {/* ═══ TOP STICKY NAV (WEBTOON STYLE) ═══ */}
       <header style={{
-        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1100,
+        position: 'fixed', top: showUI ? 0 : -66, left: 0, right: 0, zIndex: 1100,
         height: 64, background: COLORS.header, backdropFilter: 'blur(20px)',
         borderBottom: `1px solid ${COLORS.border}`,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 24px'
+        padding: '0 24px',
+        transition: 'top 0.3s cubic-bezier(0.1, 0.76, 0.55, 0.94)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <button onClick={() => navigate(`/story/${storyId}`)} style={{
@@ -417,10 +419,11 @@ export default function MantaReader() {
       {/* ═══ SCROLL PROGRESS BAR ═══ */}
       <motion.div
         style={{
-          position: 'fixed', top: 64, left: 0, right: 0, height: 3,
+          position: 'fixed', top: showUI ? 64 : 0, left: 0, right: 0, height: 3,
           background: `linear-gradient(to right, ${COLORS.accent}, ${COLORS.rose})`,
           transformOrigin: '0%',
-          zIndex: 1200, scaleX
+          zIndex: 1200, scaleX,
+          transition: 'top 0.3s cubic-bezier(0.1, 0.76, 0.55, 0.94)'
         }}
       />
 
@@ -441,8 +444,8 @@ export default function MantaReader() {
           </div>
         </div>
 
-        {/* ═══ PANELS ═══ */}
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
+        {/* ═══ PANELS (Clicking panels toggles UI visibility) ═══ */}
+        <div style={{ display: 'flex', flexDirection: 'column', cursor: 'pointer' }} onClick={() => setShowUI(!showUI)}>
           {story.displayPanels?.map((url, i) => (
             <AnimatedPanel
               key={i}
@@ -620,11 +623,12 @@ export default function MantaReader() {
 
       {/* ═══ STICKY BOTTOM NAV ═══ */}
       <footer style={{
-        position: 'fixed', bottom: 0, left: 0, right: 0, height: 60,
+        position: 'fixed', bottom: showUI ? 0 : -62, left: 0, right: 0, height: 60,
         background: 'rgba(26, 24, 46, 0.95)', backdropFilter: 'blur(20px)',
         borderTop: '1px solid rgba(255,255,255,0.1)',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 24px', zIndex: 1100
+        padding: '0 24px', zIndex: 1100,
+        transition: 'bottom 0.3s cubic-bezier(0.1, 0.76, 0.55, 0.94)'
       }}>
         <button
           disabled={!hasPrev}
