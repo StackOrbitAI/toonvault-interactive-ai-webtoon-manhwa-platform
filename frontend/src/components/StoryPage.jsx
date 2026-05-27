@@ -23,7 +23,9 @@ import {
   Lock,
   Unlock,
   ChevronDown,
-  Info
+  Info,
+  Maximize2,
+  Minimize2
 } from "lucide-react";
 import axios from "axios";
 import Header from "./Header";
@@ -502,6 +504,11 @@ export default function StoryPage() {
   // Story Nodes (Progression)
   const [storyNodes, setStoryNodes] = useState(STORY_MAP_NODES);
 
+  // Interactive Immersive Scroll Reader View State
+  const [viewMode, setViewMode] = useState("dashboard"); // 'dashboard' or 'reader'
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const readerScrollContainerRef = useRef(null);
+
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 900);
     check();
@@ -638,8 +645,18 @@ export default function StoryPage() {
   // Scene navigation
   const handleProceedToScene = (sceneNum) => {
     if (sceneNum > 5) return;
+    
+    if (sceneNum === 5) {
+      // Transition to gorgeous vertical scroll Reader view!
+      setViewMode("reader");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      triggerToast("Entering Manhwa Webtoon Scroll View!");
+      return;
+    }
+
     setActiveScene(sceneNum);
     setShowUnlock(false);
+    setViewMode("dashboard");
     
     // Update map active status
     setStoryNodes(prev => prev.map(n => ({
@@ -648,18 +665,10 @@ export default function StoryPage() {
       status: n.id < sceneNum ? "read" : (n.id === sceneNum ? "current" : n.status)
     })));
 
-    if (sceneNum === 5) {
-      setActiveDialogue({
-        speaker: "Tyrant Emperor",
-        text: "Tyrant: 'Your hands... they feel like spring breeze. Don't leave my chamber tonight, healer.'"
-      });
-      triggerToast("Advanced to Scene 5!");
-    } else {
-      setActiveDialogue(story.dialogue);
-      setChosenLabel(null);
-      setHasVoted(false);
-      triggerToast(`Returned to Scene ${sceneNum}!`);
-    }
+    setActiveDialogue(story.dialogue);
+    setChosenLabel(null);
+    setHasVoted(false);
+    triggerToast(`Returned to Scene ${sceneNum}!`);
   };
 
   // Follow author action
@@ -709,11 +718,26 @@ export default function StoryPage() {
     setActiveReplyId(null);
   };
 
+  // Handle scroll progress in webtoon reader mode
+  useEffect(() => {
+    if (viewMode !== "reader") return;
+
+    const handleScroll = () => {
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (docHeight > 0) {
+        const scrolled = (window.scrollY / docHeight) * 100;
+        setScrollProgress(scrolled);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [viewMode]);
+
   return (
     <div style={{ background: COLORS.bg, minHeight: "100vh", color: COLORS.text, fontFamily: "'Inter', sans-serif", overflowX: "hidden" }}>
-      <Header />
       
-      {/* Modals */}
+      {/* Dynamic Modals */}
       {showAgeGate && <AgeGateModal rating={story.ageRating} onConsent={handleAgeConsent} onDecline={() => setShowAgeGate(false)} />}
       {showWriteModal && <WriteModal onClose={() => setShowWriteModal(false)} onSubmit={handleCustomSceneSubmit} />}
 
@@ -738,774 +762,1008 @@ export default function StoryPage() {
         )}
       </AnimatePresence>
 
-      {/* ─── Premium Story Sticky Sub-Header ─── */}
-      <div style={{
-        position: "sticky", top: 60, zIndex: 100,
-        background: "rgba(11, 10, 20, 0.8)", backdropFilter: "blur(16px)",
-        borderBottom: `1px solid ${COLORS.border}`,
-      }}>
-        <div style={{
-          maxWidth: 1300, margin: "0 auto",
-          display: "flex", alignItems: "center", justifyItems: "center",
-          padding: isMobile ? "12px 16px" : "14px 24px",
-          gap: 16
-        }}>
-          {/* Back Icon */}
-          <button onClick={() => navigate("/")} style={{ background: "none", border: "none", color: COLORS.textMuted, cursor: "pointer", display: "flex", alignItems: "center", padding: 4 }}>
-            <ArrowLeft size={20} />
-          </button>
-
-          {/* Breadcrumb Info */}
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-              <h1 style={{ margin: 0, fontSize: isMobile ? 15 : 18, fontWeight: 900, color: "#FFF", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>
-                {story.title}
-              </h1>
-              <span style={{ color: COLORS.purple, fontSize: 13, display: "flex" }}>✓</span>
-              
-              {!isMobile && (
-                <>
-                  <span style={{ color: COLORS.textMuted, fontSize: 12 }}>by {story.author}</span>
-                  <button 
-                    onClick={toggleFollow}
-                    style={{
-                      background: isFollowing ? COLORS.purple : "transparent",
-                      border: `1px solid ${COLORS.purple}`,
-                      color: "#FFF", fontSize: 10, fontWeight: 700,
-                      padding: "3px 10px", borderRadius: 20, cursor: "pointer",
-                      display: "flex", alignItems: "center", gap: 4, transition: "all 0.2s"
-                    }}
-                  >
-                    {isFollowing ? <UserCheck size={10} /> : <UserPlus size={10} />}
-                    {isFollowing ? "Following" : "Follow"}
-                  </button>
-                </>
-              )}
-            </div>
-            
-            <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2, color: COLORS.textMuted, fontSize: 11 }}>
-              <span>{story.chapter}</span>
-              <span>•</span>
-              <span style={{ color: COLORS.purple, fontWeight: 700 }}>Scene {activeScene} of {story.totalScenes}</span>
-            </div>
-          </div>
-
-          {/* Header Action Buttons */}
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            {/* Rating Stars */}
-            <div style={{ display: "flex", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.03)", padding: "5px 10px", borderRadius: 12, border: `1px solid ${COLORS.border}` }}>
-              <Star size={12} fill={COLORS.gold} color={COLORS.gold} />
-              <span style={{ fontSize: 11, fontWeight: 800, color: COLORS.gold }}>{story.rating}</span>
-            </div>
-
-            {/* Genres */}
-            {!isMobile && story.genres.map(g => <Badge key={g} label={g} color={COLORS.purple} />)}
-
-            {/* Vault Save */}
-            <button
-              onClick={handleVaultToggle}
-              style={{
-                display: "flex", alignItems: "center", gap: 6,
-                background: savedVault ? `linear-gradient(135deg, ${COLORS.purple}, #A78BFA)` : "rgba(255,255,255,0.04)",
-                border: savedVault ? "none" : `1.5px solid ${COLORS.border}`,
-                color: "#FFF", padding: "8px 14px", borderRadius: 20, cursor: "pointer",
-                fontSize: 12, fontWeight: 700, transition: "all 0.2s",
-                boxShadow: savedVault ? `0 4px 10px ${COLORS.purple}30` : "none"
-              }}>
-              <Bookmark size={12} fill={savedVault ? "#FFF" : "none"} />
-              <span>{savedVault ? "In Vault" : "+ Vault"}</span>
-            </button>
-
-            {/* Share */}
-            {!isMobile && (
-              <button 
-                onClick={() => {
-                  navigator.clipboard.writeText(window.location.href);
-                  triggerToast("Link copied to clipboard!");
-                }}
-                style={{
-                  display: "flex", alignItems: "center", gap: 6,
-                  background: "rgba(255,255,255,0.04)", border: `1.5px solid ${COLORS.border}`,
-                  color: "#FFF", padding: "8px 14px", borderRadius: 20, cursor: "pointer",
-                  fontSize: 12, fontWeight: 700, transition: "all 0.2s"
-                }}
-                onMouseEnter={e => e.currentTarget.style.borderColor = COLORS.purple}
-                onMouseLeave={e => e.currentTarget.style.borderColor = COLORS.border}
-              >
-                <Share2 size={12} />
-                <span>Share</span>
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* ─── Main Grid Layout ─── */}
-      <div style={{
-        maxWidth: 1300, margin: "0 auto",
-        padding: isMobile ? "16px 16px 100px" : "24px 24px 60px",
-        display: isMobile ? "block" : "grid",
-        gridTemplateColumns: "72px 1fr 340px",
-        gap: 24,
-        alignItems: "start",
-      }}>
-        
-        {/* SIDEBAR NAVIGATION (Desktop) */}
-        {!isMobile && (
-          <div style={{
-            position: "sticky", top: 150,
-            display: "flex", flexDirection: "column", alignItems: "center", gap: 16,
-            padding: "8px 0"
-          }}>
-            {[
-              { icon: "🏠", label: "Home", path: "/" },
-              { icon: "🔍", label: "Explore", path: "/browse" },
-              { icon: "🗃️", label: "Vault", path: "/dashboard", active: true },
-              { icon: "✏️", label: "Create", path: "/creators" },
-              { icon: "🔔", label: "Notifs", isToast: true },
-            ].map(item => (
-              <button 
-                key={item.label} 
-                onClick={() => {
-                  if (item.isToast) {
-                    triggerToast("You have no new notifications.");
-                  } else {
-                    navigate(item.path);
-                  }
-                }}
-                title={item.label} 
-                style={{
-                  width: 52, height: 52, borderRadius: 14,
-                  background: item.active ? COLORS.purpleLight : "transparent",
-                  border: item.active ? `1px solid ${COLORS.purple}40` : "1px solid transparent",
-                  cursor: "pointer", display: "flex", flexDirection: "column",
-                  alignItems: "center", justifyContent: "center", gap: 3,
-                  transition: "all 0.2s", color: item.active ? COLORS.purple : COLORS.textMuted
-                }}
-                onMouseEnter={e => {
-                  if (!item.active) {
-                    e.currentTarget.style.background = "rgba(255,255,255,0.03)";
-                    e.currentTarget.style.color = "#FFF";
-                  }
-                }}
-                onMouseLeave={e => {
-                  if (!item.active) {
-                    e.currentTarget.style.background = "transparent";
-                    e.currentTarget.style.color = COLORS.textMuted;
-                  }
-                }}
-              >
-                <span style={{ fontSize: 18 }}>{item.icon}</span>
-                <span style={{ fontSize: 8, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5 }}>{item.label}</span>
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* CENTER STORY BOARD */}
-        <div style={{ minWidth: 0 }}>
+      <AnimatePresence mode="wait">
+        {viewMode === "reader" ? (
           
-          {/* Main Visual Comic Banner */}
-          <div style={{
-            borderRadius: 24, overflow: "hidden",
-            background: "linear-gradient(180deg, #100E26 0%, #06050F 100%)",
-            position: "relative", aspectRatio: isMobile ? "4/3" : "21/9",
-            marginBottom: 24, border: `1px solid ${COLORS.border}`,
-            boxShadow: "0 15px 40px rgba(0,0,0,0.4)"
-          }}>
-            {/* Rich Webtoon Illustration Cover */}
-            <img 
-              src={story.coverImage} 
-              alt="Manhwa scene illustration"
-              style={{
-                width: "100%", height: "100%", objectFit: "cover",
-                opacity: 0.85
-              }}
-            />
-            {/* Cinematic Gradient Overlays */}
+          /* ─── IMMERSIVE WEBTOON SCROLL READER SCREEN ─── */
+          <motion.div
+            key="reader-view"
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -40 }}
+            transition={{ duration: 0.5, ease: "easeInOut" }}
+            style={{ background: "#05040A", minHeight: "100vh", color: "#FFF", paddingBottom: "100px" }}
+          >
+            {/* Scroll indicator header */}
             <div style={{
-              position: "absolute", inset: 0,
-              background: "linear-gradient(to bottom, transparent 30%, rgba(5,4,10,0.85) 100%)",
-            }} />
-            
-            {/* Glowing particle effect indicators */}
-            <div style={{
-              position: "absolute", top: 20, left: 20,
-              background: "rgba(139,92,246,0.25)", border: `1px solid ${COLORS.purple}`,
-              padding: "4px 10px", borderRadius: 8, fontSize: 11, fontWeight: 700,
-              color: "#FFF", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", gap: 5
+              position: "sticky", top: 0, left: 0, right: 0, zIndex: 500,
+              background: "rgba(5, 4, 10, 0.92)", backdropFilter: "blur(20px)",
+              borderBottom: `1px solid ${COLORS.border}`, padding: "14px 20px"
             }}>
-              <Sparkles size={11} color={COLORS.purple} />
-              <span>Interactive Story Pilot</span>
-            </div>
-
-            {/* Scene tag indicator */}
-            <div style={{
-              position: "absolute", top: 20, right: 20,
-              background: "rgba(0,0,0,0.6)", border: `1px solid ${COLORS.border}`,
-              padding: "4px 10px", borderRadius: 8, fontSize: 10, fontWeight: 700,
-              color: COLORS.textMuted
-            }}>
-              Scene {activeScene}/10
-            </div>
-
-            {/* Premium Dialogue Bubble */}
-            <div style={{
-              position: "absolute", bottom: 20, left: 20, right: 20,
-              background: "rgba(15, 13, 28, 0.85)", backdropFilter: "blur(12px)",
-              border: `1px solid ${COLORS.purple}30`, borderRadius: 16,
-              padding: "14px 20px", display: "flex", gap: 12, alignItems: "center",
-              boxShadow: "0 8px 25px rgba(0,0,0,0.5)"
-            }}>
-              <div style={{
-                width: 32, height: 32, borderRadius: 10,
-                background: `linear-gradient(135deg, ${COLORS.purple}, ${COLORS.rose})`,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 14, fontWeight: 800, color: "#FFF", flexShrink: 0
-              }}>
-                💬
+              <div style={{ maxWidth: 800, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <button 
+                  onClick={() => handleProceedToScene(4)}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 8,
+                    background: "rgba(255,255,255,0.05)", border: `1px solid ${COLORS.border}`,
+                    color: "#FFF", padding: "8px 16px", borderRadius: 12, cursor: "pointer",
+                    fontSize: 12, fontWeight: 700, transition: "all 0.2s"
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = COLORS.purple}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = COLORS.border}
+                >
+                  <ArrowLeft size={14} /> Exit Reader
+                </button>
+                <div style={{ textAlign: "center" }}>
+                  <div style={{ fontSize: 14, fontWeight: 900 }}>{story.title}</div>
+                  <div style={{ fontSize: 11, color: COLORS.textMuted, marginTop: 2 }}>Chapter 1 • Scene 5 (Outcome)</div>
+                </div>
+                <div style={{ width: 100, fontSize: 11, fontWeight: 700, color: COLORS.purple, textAlign: "right" }}>
+                  {Math.round(scrollProgress)}% Read
+                </div>
               </div>
-              <div style={{ flex: 1 }}>
-                <span style={{ color: COLORS.purple, fontWeight: 800, fontSize: 13, textTransform: "uppercase", letterSpacing: 0.5 }}>
-                  {activeDialogue.speaker}:
-                </span>
-                <p style={{ margin: "3px 0 0", color: "#E5E7EB", fontSize: 13, lineHeight: 1.5, fontWeight: 500, fontFamily: "Georgia, serif", fontStyle: "italic" }}>
-                  "{activeDialogue.text}"
-                </p>
+
+              {/* Glowing scroll progress tracker */}
+              <div style={{ position: "absolute", bottom: -1, left: 0, right: 0, height: 2, background: "rgba(255,255,255,0.05)" }}>
+                <div style={{
+                  height: "100%", width: `${scrollProgress}%`,
+                  background: `linear-gradient(90deg, ${COLORS.purple}, ${COLORS.rose})`,
+                  boxShadow: `0 0 10px ${COLORS.purple}`
+                }} />
               </div>
             </div>
-          </div>
 
-          {/* Interactive Choices Section */}
-          <div style={{ marginBottom: 28 }}>
-            <div style={{ textAlign: "center", marginBottom: 20 }}>
-              <span style={{
-                fontSize: isMobile ? 18 : 22, fontWeight: 900, color: "#FFF",
-                fontFamily: "Georgia, serif", letterSpacing: 0.5, display: "flex", alignItems: "center", justifyContent: "center", gap: 8
-              }}>
-                <Sparkles size={18} color={COLORS.purple} /> ✦ What happens next? ✦
-              </span>
-            </div>
+            {/* Immersive Panels Strip */}
+            <div style={{ maxWidth: 640, margin: "0 auto", padding: "20px 16px" }}>
+              
+              {/* Panel 1 */}
+              <div style={{ position: "relative", marginBottom: "40px", borderRadius: 20, overflow: "hidden", border: `1px solid ${COLORS.border}` }}>
+                <img 
+                  src="/covers/horror_cover_1777743387658.png" 
+                  alt="Approaching the chamber" 
+                  style={{ width: "100%", height: "auto", display: "block", opacity: 0.9 }}
+                />
+                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 40%, rgba(5,4,10,0.95) 100%)" }} />
+                
+                {/* Floating dialogue bubble */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ duration: 0.6, ease: "easeOut" }}
+                  style={{
+                    position: "absolute", bottom: 20, left: 20, right: 20,
+                    background: "rgba(11, 10, 20, 0.9)", backdropFilter: "blur(12px)",
+                    borderRadius: 16, padding: "14px 18px", border: `1px solid ${COLORS.border}`,
+                    boxShadow: "0 10px 30px rgba(0,0,0,0.5)"
+                  }}
+                >
+                  <span style={{ color: COLORS.purple, fontWeight: 800, fontSize: 12, textTransform: "uppercase" }}>Elara (Narration)</span>
+                  <p style={{ margin: "4px 0 0", fontSize: 13, lineHeight: 1.5, fontFamily: "Georgia, serif", fontStyle: "italic", color: "#E5E7EB" }}>
+                    "The palace corridors are dead silent... only the flickering candles keep me company as I slip towards the Emperor's forbidden chambers."
+                  </p>
+                </motion.div>
+              </div>
 
-            {/* List of Choice Cards */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              {choicesList.map(choice => {
-                const isSelected = chosenLabel === choice.label;
-                return (
-                  <div
-                    key={choice.label}
-                    onClick={() => handleChoice(choice)}
-                    style={{
-                      background: isSelected ? "rgba(139, 92, 246, 0.08)" : 
-                                  choice.isWrite ? "rgba(139, 92, 246, 0.02)" : COLORS.bgSubtle,
-                      border: isSelected ? `2.5px solid ${COLORS.purple}` :
-                              choice.isWrite ? `1.5px dashed ${COLORS.purple}40` : `1.5px solid ${COLORS.border}`,
-                      borderRadius: 16, padding: "16px",
-                      cursor: "pointer", transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
-                      boxShadow: isSelected ? `0 0 20px ${COLORS.purple}15` : "0 4px 10px rgba(0,0,0,0.15)"
-                    }}
-                    onMouseEnter={e => {
-                      if (!isSelected) {
-                        e.currentTarget.style.borderColor = COLORS.purple;
-                        e.currentTarget.style.transform = "translateY(-2px)";
-                      }
-                    }}
-                    onMouseLeave={e => {
-                      if (!isSelected) {
-                        e.currentTarget.style.borderColor = choice.isWrite ? `${COLORS.purple}40` : COLORS.border;
-                        e.currentTarget.style.transform = "translateY(0)";
-                      }
-                    }}
-                  >
-                    <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
-                      {/* Round Badge Label */}
-                      <span style={{
-                        width: 34, height: 34, borderRadius: 10,
-                        background: choice.isWrite ? `${COLORS.purple}20` : `linear-gradient(135deg, ${COLORS.purple}, #A78BFA)`,
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        fontSize: 14, fontWeight: 900,
-                        color: choice.isWrite ? COLORS.purple : "#FFF", flexShrink: 0,
-                        boxShadow: choice.isWrite ? "none" : "0 4px 10px rgba(139,92,246,0.3)"
-                      }}>{choice.label}</span>
-                      
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 3 }}>
-                          <span style={{ fontWeight: 800, fontSize: 15, color: "#FFF" }}>{choice.title}</span>
-                          {choice.popular && (
-                            <span style={{
-                              background: `${COLORS.gold}15`, color: COLORS.gold, fontSize: 10,
-                              padding: "2px 8px", borderRadius: 6, fontWeight: 700, display: "flex", alignItems: "center", gap: 3
-                            }}>
-                              <Flame size={10} fill={COLORS.gold} /> Popular
-                            </span>
-                          )}
-                          {choice.ageRestricted && (
-                            <span style={{
-                              background: `${COLORS.rose}20`, color: COLORS.rose, fontSize: 10,
-                              padding: "2px 8px", borderRadius: 6, fontWeight: 700
-                            }}>
-                              ⚠ 16+
-                            </span>
-                          )}
-                        </div>
-                        
-                        <p style={{ color: COLORS.textMuted, fontSize: 13, margin: "0 0 8px", lineHeight: 1.5 }}>
-                          {choice.desc}
-                        </p>
+              {/* Panel 2 */}
+              <div style={{ position: "relative", marginBottom: "40px", borderRadius: 20, overflow: "hidden", border: `1px solid ${COLORS.border}` }}>
+                <img 
+                  src="/covers/drama_cover_1777743372879.png" 
+                  alt="Confrontation in the chamber" 
+                  style={{ width: "100%", height: "auto", display: "block", opacity: 0.9 }}
+                />
+                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 40%, rgba(5,4,10,0.95) 100%)" }} />
+                
+                {/* Floating dialogue bubble */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ duration: 0.6, ease: "easeOut" }}
+                  style={{
+                    position: "absolute", bottom: 20, left: 20, right: 20,
+                    background: "rgba(11, 10, 20, 0.9)", backdropFilter: "blur(12px)",
+                    borderRadius: 16, padding: "14px 18px", border: `1px solid ${COLORS.border}`,
+                    boxShadow: "0 10px 30px rgba(0,0,0,0.5)"
+                  }}
+                >
+                  <span style={{ color: COLORS.rose, fontWeight: 800, fontSize: 12, textTransform: "uppercase" }}>System</span>
+                  <p style={{ margin: "4px 0 0", fontSize: 13, lineHeight: 1.5, fontFamily: "Georgia, serif", fontStyle: "italic", color: "#E5E7EB" }}>
+                    "The heavy oak doors creak open. There lies the Tyrant Emperor, gasping heavily on his velvet bed as the glowing dark curse of blood magic slowly spreads across his chest..."
+                  </p>
+                </motion.div>
+              </div>
 
-                        {/* Interactive write-in input representation */}
-                        {choice.isWrite && (
-                          <div style={{
-                            display: "flex", alignItems: "center", gap: 8, marginTop: 8,
-                            background: "rgba(0,0,0,0.2)", borderRadius: 10,
-                            padding: "10px 14px", border: `1px solid ${COLORS.border}`
-                          }}>
-                            <span style={{ color: COLORS.textMuted, fontSize: 12, flex: 1 }}>Type your plot twist and submit...</span>
-                            <span style={{ color: COLORS.purple, fontSize: 14 }}>✏️</span>
-                          </div>
-                        )}
+              {/* Panel 3 (Healing Masterpiece Panel) */}
+              <div style={{ position: "relative", marginBottom: "40px", borderRadius: 20, overflow: "hidden", border: `1px solid ${COLORS.border}` }}>
+                <img 
+                  src="/covers/secret_healer_scene.png" 
+                  alt="Magical Healing" 
+                  style={{ width: "100%", height: "auto", display: "block" }}
+                />
+                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 40%, rgba(5,4,10,0.95) 100%)" }} />
+                
+                {/* Dynamic Bubble based on what the user chose! */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ duration: 0.6, ease: "easeOut" }}
+                  style={{
+                    position: "absolute", bottom: 20, left: 20, right: 20,
+                    background: "rgba(15, 13, 28, 0.92)", backdropFilter: "blur(12px)",
+                    borderRadius: 16, padding: "14px 18px", border: `1px solid ${COLORS.purple}50`,
+                    boxShadow: "0 10px 30px rgba(139,92,246,0.3)"
+                  }}
+                >
+                  <span style={{ color: COLORS.purple, fontWeight: 900, fontSize: 12, textTransform: "uppercase", letterSpacing: 0.5 }}>
+                    Elara (Your Decision):
+                  </span>
+                  <p style={{ margin: "4px 0 0", fontSize: 13, lineHeight: 1.5, fontFamily: "Georgia, serif", fontStyle: "italic", color: "#FFF" }}>
+                    "{activeDialogue.text.replace("Elara: ", "")}"
+                  </p>
+                </motion.div>
+              </div>
 
-                        {/* Tags & Meta */}
-                        {choice.tags.length > 0 && (
-                          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
-                            {choice.tags.map(t => <Badge key={t} label={t} color={COLORS.purple} />)}
-                            <span style={{ color: COLORS.textMuted, fontSize: 11, display: "flex", alignItems: "center", gap: 4, marginLeft: 6 }}>
-                              🔥 {((choice.votes / totalVotes) * 100 || 25).toFixed(1)}% of readers chose this
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                      <ChevronRight size={20} color="rgba(255,255,255,0.2)" style={{ marginTop: 8 }} />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+              {/* Panel 4 (The Tyrant's Reaction) */}
+              <div style={{ position: "relative", marginBottom: "50px", borderRadius: 20, overflow: "hidden", border: `1px solid ${COLORS.border}` }}>
+                <img 
+                  src="/covers/romance_cover_1777743324375.png" 
+                  alt="The Tyrant Wakes" 
+                  style={{ width: "100%", height: "auto", display: "block", opacity: 0.85 }}
+                />
+                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 40%, rgba(5,4,10,0.95) 100%)" }} />
+                
+                {/* Speech bubble */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ duration: 0.6, ease: "easeOut" }}
+                  style={{
+                    position: "absolute", bottom: 20, left: 20, right: 20,
+                    background: "rgba(11, 10, 20, 0.9)", backdropFilter: "blur(12px)",
+                    borderRadius: 16, padding: "14px 18px", border: `1px solid ${COLORS.border}`,
+                    boxShadow: "0 10px 30px rgba(0,0,0,0.5)"
+                  }}
+                >
+                  <span style={{ color: COLORS.gold, fontWeight: 800, fontSize: 12, textTransform: "uppercase" }}>Tyrant Emperor</span>
+                  <p style={{ margin: "4px 0 0", fontSize: 13, lineHeight: 1.5, fontFamily: "Georgia, serif", fontStyle: "italic", color: "#E5E7EB" }}>
+                    "This warm light... who are you? Your healing touch... it makes the pain disappear. Don't leave my side tonight, healer..."
+                  </p>
+                </motion.div>
+              </div>
 
-          {/* Interactive Unlock Panel */}
-          <AnimatePresence>
-            {showUnlock && (
-              <motion.div 
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
+              {/* Congratulations/Outcome Complete Card */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
                 style={{
                   background: "linear-gradient(135deg, #120D2A, #06050F)",
-                  border: `1.5px solid ${COLORS.purple}50`,
-                  borderRadius: 20, padding: "24px", marginBottom: 24,
-                  position: "relative", overflow: "hidden",
-                  boxShadow: "0 10px 30px rgba(139,92,246,0.15)"
+                  border: `1.5px solid ${COLORS.purple}`,
+                  borderRadius: 24, padding: "30px", textAlign: "center",
+                  boxShadow: "0 15px 40px rgba(139,92,246,0.25)"
                 }}
               >
-                <div style={{ display: "flex", gap: 14, alignItems: "flex-start", marginBottom: 12 }}>
-                  <div style={{
-                    width: 44, height: 44, borderRadius: 12,
-                    background: "rgba(139,92,246,0.15)", border: `1px solid ${COLORS.purple}`,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 20, flexShrink: 0
-                  }}>
-                    📖
-                  </div>
-                  <div>
-                    <h3 style={{ margin: 0, color: "#FFF", fontSize: 16, fontWeight: 800 }}>Storyline Unlocked!</h3>
-                    <p style={{ margin: "4px 0 0", color: COLORS.textMuted, fontSize: 13, lineHeight: 1.5 }}>
-                      Your decision has opened a new pathway. Are you ready to see the consequences of your choice?
-                    </p>
-                  </div>
-                </div>
-
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center", marginTop: 16 }}>
-                  <button 
-                    onClick={() => handleProceedToScene(5)}
-                    style={{
-                      background: `linear-gradient(135deg, ${COLORS.purple}, #A78BFA)`,
-                      border: "none", color: "#FFF", padding: "12px 24px",
-                      borderRadius: 12, fontWeight: 700, cursor: "pointer", fontSize: 13,
-                      boxShadow: `0 4px 15px ${COLORS.purple}40`, transition: "all 0.2s"
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.transform = "translateY(-1px)"}
-                    onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}
-                  >
-                    Continue to Scene 5 →
-                  </button>
-                  
-                  {chosenLabel !== "D" && (
-                    <span style={{ color: COLORS.textMuted, fontSize: 12 }}>
-                      or explore other choices below!
-                    </span>
-                  )}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Interactive Live Polling (Fan Vote) */}
-          <div style={{
-            background: COLORS.bgSubtle, border: `1px solid ${COLORS.border}`, borderRadius: 20,
-            padding: "20px", marginBottom: 24, boxShadow: "0 4px 15px rgba(0,0,0,0.1)"
-          }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-              <div style={{ fontWeight: 800, fontSize: 15, color: "#FFF", display: "flex", alignItems: "center", gap: 8 }}>
-                📊 Fan Vote Poll <Badge label="Live Results" color={COLORS.rose} />
-              </div>
-              <span style={{ color: COLORS.textMuted, fontSize: 12, fontWeight: 600 }}>Total: {totalVotes.toLocaleString()} votes</span>
-            </div>
-            
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              {choicesList.map(c => {
-                const percentage = totalVotes > 0 ? (c.votes / totalVotes) * 100 : 25;
-                const isSelected = chosenLabel === c.label;
-                return (
-                  <div key={c.label}>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5, fontSize: 13 }}>
-                      <span style={{ color: isSelected ? COLORS.purple : "#FFF", fontWeight: isSelected ? 800 : 600 }}>
-                        {c.label} · {c.title} {isSelected && " (Your Vote)"}
-                      </span>
-                      <span style={{ fontWeight: 700, color: isSelected ? COLORS.purple : COLORS.textMuted }}>
-                        {percentage.toFixed(1)}%
-                      </span>
-                    </div>
-                    {/* Bar Tracker */}
-                    <div style={{ height: 8, background: "rgba(0,0,0,0.25)", borderRadius: 6, overflow: "hidden", border: `1px solid ${COLORS.border}` }}>
-                      <motion.div 
-                        initial={{ width: 0 }}
-                        animate={{ width: `${percentage}%` }}
-                        transition={{ duration: 0.6, ease: "easeOut" }}
-                        style={{
-                          height: "100%",
-                          background: isSelected 
-                            ? `linear-gradient(90deg, ${COLORS.purple}, ${COLORS.rose})` 
-                            : `linear-gradient(90deg, rgba(139,92,246,0.35), rgba(139,92,246,0.15))`,
-                          borderRadius: 6
-                        }} 
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Scene Traversal Buttons */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
-            <button 
-              onClick={() => handleProceedToScene(4)}
-              disabled={activeScene === 4}
-              style={{
-                display: "flex", alignItems: "center", gap: 8,
-                background: "transparent", border: `1px solid ${COLORS.border}`,
-                color: activeScene === 4 ? "rgba(255,255,255,0.15)" : "#FFF", 
-                padding: "10px 18px", borderRadius: 12, cursor: activeScene === 4 ? "not-allowed" : "pointer", 
-                fontSize: 13, fontWeight: 700, transition: "all 0.2s"
-              }}
-              onMouseEnter={e => { if(activeScene > 4) e.currentTarget.style.borderColor = COLORS.purple; }}
-              onMouseLeave={e => { if(activeScene > 4) e.currentTarget.style.borderColor = COLORS.border; }}
-            >
-              ← Previous Scene
-            </button>
-            
-            <button style={{
-              display: "flex", alignItems: "center", gap: 6, color: COLORS.rose,
-              background: "transparent", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600
-            }}>
-              <AlertTriangle size={12} /> Report Scene
-            </button>
-          </div>
-
-          {/* Comments Section */}
-          <div style={{
-            background: COLORS.bgSubtle, border: `1px solid ${COLORS.border}`, borderRadius: 20,
-            padding: "20px", marginBottom: 24, boxShadow: "0 4px 15px rgba(0,0,0,0.1)"
-          }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-              <div style={{ fontWeight: 800, fontSize: 16, color: "#FFF", display: "flex", alignItems: "center", gap: 8 }}>
-                <MessageSquare size={16} color={COLORS.purple} /> 💬 Reader Discussions ({comments.length})
-              </div>
-              <Badge label="Top Comments" color={COLORS.purple} />
-            </div>
-
-            {/* Comment Form Input */}
-            <form onSubmit={handlePostComment} style={{ display: "flex", gap: 10, marginBottom: 24, alignItems: "flex-start" }}>
-              <Avatar initials="YO" size={34} color={COLORS.purple} />
-              <div style={{ flex: 1, position: "relative" }}>
-                <input
-                  type="text"
-                  value={commentText}
-                  onChange={e => setCommentText(e.target.value)}
-                  placeholder="Share your thoughts on this scene choice..."
-                  style={{
-                    width: "100%", background: "rgba(0,0,0,0.2)",
-                    border: `1px solid ${COLORS.border}`, borderRadius: 12,
-                    color: "#FFF", padding: "12px 48px 12px 14px", fontSize: 13,
-                    outline: "none", boxSizing: "border-box", transition: "all 0.2s"
-                  }}
-                  onFocus={e => e.target.style.borderColor = COLORS.purple}
-                  onBlur={e => e.target.style.borderColor = COLORS.border}
-                />
-                <button
-                  type="submit"
-                  style={{
-                    position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)",
-                    background: COLORS.purple, border: "none", width: 32, height: 32,
-                    borderRadius: 10, color: "#FFF", display: "flex", alignItems: "center",
-                    justifyContent: "center", cursor: "pointer", boxShadow: `0 2px 8px ${COLORS.purple}40`
-                  }}
-                >
-                  <Send size={12} />
-                </button>
-              </div>
-            </form>
-
-            {/* Comments List */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-              <AnimatePresence initial={false}>
-                {comments.map((c, i) => (
-                  <motion.div 
-                    key={c.id}
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.25 }}
-                    style={{
-                      display: "flex", gap: 12, padding: "16px 0",
-                      borderBottom: i < comments.length - 1 ? `1px solid ${COLORS.border}` : "none",
-                    }}
-                  >
-                    <Avatar initials={c.avatar} size={34} color={c.user === 'You' ? COLORS.purple : "#6B7280"} />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                        <span style={{ fontWeight: 800, fontSize: 13, color: "#FFF" }}>{c.user}</span>
-                        {c.user !== 'You' && <Badge label={`Lv.${c.level}`} color="#9CA3AF" style={{ fontSize: 9 }} />}
-                        <span style={{ color: COLORS.textMuted, fontSize: 11 }}>{c.time}</span>
-                      </div>
-                      
-                      <p style={{ color: "#E5E7EB", fontSize: 13, margin: "0 0 8px", lineHeight: 1.5 }}>{c.text}</p>
-                      
-                      <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
-                        {/* Interactive Likes button with bouncy scale */}
-                        <button 
-                          onClick={() => handleLikeComment(c.id)}
-                          style={{ 
-                            color: c.isLiked ? COLORS.rose : COLORS.textMuted, 
-                            background: "none", border: "none", cursor: "pointer", 
-                            fontSize: 12, display: "flex", alignItems: "center", gap: 4,
-                            fontWeight: 600, padding: 0
-                          }}
-                        >
-                          <Heart size={12} fill={c.isLiked ? COLORS.rose : "none"} /> 
-                          <span>{c.likes}</span>
-                        </button>
-                        
-                        <button 
-                          onClick={() => setActiveReplyId(activeReplyId === c.id ? null : c.id)}
-                          style={{ 
-                            color: COLORS.purple, background: "none", border: "none", 
-                            cursor: "pointer", fontSize: 12, fontWeight: 600, padding: 0 
-                          }}
-                        >
-                          Reply
-                        </button>
-                      </div>
-
-                      {/* Expandable Reply Box */}
-                      {activeReplyId === c.id && (
-                        <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-                          <input 
-                            type="text"
-                            value={replyText}
-                            onChange={e => setReplyText(e.target.value)}
-                            placeholder="Write a reply..."
-                            style={{
-                              flex: 1, background: "rgba(0,0,0,0.15)",
-                              border: `1px solid ${COLORS.border}`, borderRadius: 8,
-                              color: "#FFF", padding: "8px 12px", fontSize: 12, outline: "none"
-                            }}
-                          />
-                          <button 
-                            onClick={() => handleReplySubmit(c.id)}
-                            style={{
-                              background: COLORS.purple, border: "none", color: "#FFF",
-                              borderRadius: 8, padding: "0 14px", fontSize: 12, fontWeight: 700, cursor: "pointer"
-                            }}
-                          >Post</button>
-                        </div>
-                      )}
-                    </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
-          </div>
-        </div>
-
-        {/* ─── RIGHT COLUMN SIDEBAR (Desktop) ─── */}
-        {!isMobile && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 20, position: "sticky", top: 150 }}>
-            
-            {/* Custom Interactive You Chose Panel */}
-            {chosenLabel && (
-              <div style={{
-                background: "linear-gradient(135deg, #120D2A, #06050F)",
-                border: `1.5px solid ${COLORS.purple}`,
-                borderRadius: 20, padding: "16px",
-                boxShadow: "0 10px 25px rgba(139,92,246,0.15)"
-              }}>
-                <span style={{ fontSize: 9, fontWeight: 800, color: COLORS.purple, letterSpacing: 1.5, display: "block", marginBottom: 8, textTransform: "uppercase" }}>Your Selection</span>
-                
-                <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 12 }}>
-                  <span style={{
-                    width: 28, height: 28, borderRadius: 8,
-                    background: `linear-gradient(135deg, ${COLORS.purple}, #A78BFA)`,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 12, fontWeight: 900, color: "#FFF"
-                  }}>{chosenLabel}</span>
-                  <div>
-                    <h4 style={{ margin: 0, color: "#FFF", fontSize: 14, fontWeight: 850 }}>
-                      {choicesList.find(c => c.label === chosenLabel)?.title}
-                    </h4>
-                    <span style={{ color: COLORS.textMuted, fontSize: 11 }}>Active path: Scene {activeScene}</span>
-                  </div>
-                </div>
-                
-                <p style={{ color: COLORS.textMuted, fontSize: 12, lineHeight: 1.4, margin: "0 0 12px" }}>
-                  {choicesList.find(c => c.label === chosenLabel)?.desc}
+                <div style={{ fontSize: 32, marginBottom: 8 }}>✨</div>
+                <h3 style={{ margin: 0, fontSize: 18, color: "#FFF", fontWeight: 800 }}>Pathway Completed!</h3>
+                <p style={{ color: COLORS.textMuted, fontSize: 13, lineHeight: 1.5, margin: "6px 0 20px" }}>
+                  You have successfully completed **Scene 5** of Chapter 1 through the **"{chosenLabel ? choicesList.find(c => c.label === chosenLabel)?.title : "Custom"}"** branch.
                 </p>
 
-                <button 
-                  onClick={() => handleProceedToScene(5)}
-                  style={{
-                    width: "100%", background: COLORS.purple, border: "none",
-                    color: "#FFF", padding: "10px 0", borderRadius: 10,
-                    fontSize: 12, fontWeight: 700, cursor: "pointer",
-                    boxShadow: `0 4px 10px ${COLORS.purple}30`
-                  }}
-                >
-                  Proceed to Scene 5 →
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  <button 
+                    onClick={() => handleProceedToScene(4)}
+                    style={{
+                      width: "100%", padding: "12px 0", background: COLORS.purple,
+                      border: "none", color: "#FFF", borderRadius: 12, fontWeight: 700,
+                      cursor: "pointer", fontSize: 13, transition: "all 0.2s"
+                    }}
+                  >
+                    Return to Story Dashboard
+                  </button>
+                  <button 
+                    onClick={() => {
+                      triggerToast("Story rated 5 Stars!");
+                    }}
+                    style={{
+                      width: "100%", padding: "12px 0", background: "transparent",
+                      border: `1px solid ${COLORS.border}`, color: "#FFF", borderRadius: 12, fontWeight: 700,
+                      cursor: "pointer", fontSize: 13, transition: "all 0.2s"
+                    }}
+                  >
+                    ⭐ Rate this Storyline
+                  </button>
+                </div>
+              </motion.div>
+
+            </div>
+          </motion.div>
+        ) : (
+          
+          /* ─── CLASSIC GLASSMORPHIC STORY DASHBOARD SCREEN ─── */
+          <motion.div
+            key="dashboard-view"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Header />
+
+            {/* ── Topbar / Sticky Sub-Header ── */}
+            <div style={{
+              position: "sticky", top: 60, zIndex: 50,
+              background: "rgba(11, 10, 20, 0.8)", backdropFilter: "blur(16px)",
+              borderBottom: `1px solid ${COLORS.border}`,
+            }}>
+              <div style={{
+                maxWidth: 1300, margin: "0 auto",
+                display: "flex", alignItems: "center", justifyItems: "center",
+                padding: isMobile ? "12px 16px" : "14px 24px",
+                gap: 16
+              }}>
+                {/* Back Icon */}
+                <button onClick={() => navigate("/")} style={{ background: "none", border: "none", color: COLORS.textMuted, cursor: "pointer", display: "flex", alignItems: "center", padding: 4 }}>
+                  <ArrowLeft size={20} />
                 </button>
+
+                {/* Breadcrumb Info */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                    <h1 style={{ margin: 0, fontSize: isMobile ? 15 : 18, fontWeight: 900, color: "#FFF", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>
+                      {story.title}
+                    </h1>
+                    <span style={{ color: COLORS.purple, fontSize: 13, display: "flex" }}>✓</span>
+                    
+                    {!isMobile && (
+                      <>
+                        <span style={{ color: COLORS.textMuted, fontSize: 12 }}>by {story.author}</span>
+                        <button 
+                          onClick={toggleFollow}
+                          style={{
+                            background: isFollowing ? COLORS.purple : "transparent",
+                            border: `1px solid ${COLORS.purple}`,
+                            color: "#FFF", fontSize: 10, fontWeight: 700,
+                            padding: "3px 10px", borderRadius: 20, cursor: "pointer",
+                            display: "flex", alignItems: "center", gap: 4, transition: "all 0.2s"
+                          }}
+                        >
+                          {isFollowing ? <UserCheck size={10} /> : <UserPlus size={10} />}
+                          {isFollowing ? "Following" : "Follow"}
+                        </button>
+                      </>
+                    )}
+                  </div>
+                  
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2, color: COLORS.textMuted, fontSize: 11 }}>
+                    <span>{story.chapter}</span>
+                    <span>•</span>
+                    <span style={{ color: COLORS.purple, fontWeight: 700 }}>Scene {activeScene} of {story.totalScenes}</span>
+                  </div>
+                </div>
+
+                {/* Header Action Buttons */}
+                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                  {/* Rating Stars */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 4, background: "rgba(255,255,255,0.03)", padding: "5px 10px", borderRadius: 12, border: `1px solid ${COLORS.border}` }}>
+                    <Star size={12} fill={COLORS.gold} color={COLORS.gold} />
+                    <span style={{ fontSize: 11, fontWeight: 800, color: COLORS.gold }}>{story.rating}</span>
+                  </div>
+
+                  {/* Genres */}
+                  {!isMobile && story.genres.map(g => <Badge key={g} label={g} color={COLORS.purple} />)}
+
+                  {/* Vault Save */}
+                  <button
+                    onClick={handleVaultToggle}
+                    style={{
+                      display: "flex", alignItems: "center", gap: 6,
+                      background: savedVault ? `linear-gradient(135deg, ${COLORS.purple}, #A78BFA)` : "rgba(255,255,255,0.04)",
+                      border: savedVault ? "none" : `1.5px solid ${COLORS.border}`,
+                      color: "#FFF", padding: "8px 14px", borderRadius: 20, cursor: "pointer",
+                      fontSize: 12, fontWeight: 700, transition: "all 0.2s",
+                      boxShadow: savedVault ? `0 4px 10px ${COLORS.purple}30` : "none"
+                    }}>
+                    <Bookmark size={12} fill={savedVault ? "#FFF" : "none"} />
+                    <span>{savedVault ? "In Vault" : "+ Vault"}</span>
+                  </button>
+
+                  {/* Share */}
+                  {!isMobile && (
+                    <button 
+                      onClick={() => {
+                        navigator.clipboard.writeText(window.location.href);
+                        triggerToast("Link copied to clipboard!");
+                      }}
+                      style={{
+                        display: "flex", alignItems: "center", gap: 6,
+                        background: "rgba(255,255,255,0.04)", border: `1.5px solid ${COLORS.border}`,
+                        color: "#FFF", padding: "8px 14px", borderRadius: 20, cursor: "pointer",
+                        fontSize: 12, fontWeight: 700, transition: "all 0.2s"
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.borderColor = COLORS.purple}
+                      onMouseLeave={e => e.currentTarget.style.borderColor = COLORS.border}
+                    >
+                      <Share2 size={12} />
+                      <span>Share</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* ── Main Grid Layout ── */}
+            <div style={{
+              maxWidth: 1300, margin: "0 auto",
+              padding: isMobile ? "16px 16px 100px" : "24px 24px 60px",
+              display: isMobile ? "block" : "grid",
+              gridTemplateColumns: "72px 1fr 340px",
+              gap: 24,
+              alignItems: "start",
+            }}>
+              
+              {/* SIDEBAR NAVIGATION (Desktop) */}
+              {!isMobile && (
+                <div style={{
+                  position: "sticky", top: 150,
+                  display: "flex", flexDirection: "column", alignItems: "center", gap: 16,
+                  padding: "8px 0"
+                }}>
+                  {[
+                    { icon: "🏠", label: "Home", path: "/" },
+                    { icon: "🔍", label: "Explore", path: "/browse" },
+                    { icon: "🗃️", label: "Vault", path: "/dashboard", active: true },
+                    { icon: "✏️", label: "Create", path: "/creators" },
+                    { icon: "🔔", label: "Notifs", isToast: true },
+                  ].map(item => (
+                    <button 
+                      key={item.label} 
+                      onClick={() => {
+                        if (item.isToast) {
+                          triggerToast("You have no new notifications.");
+                        } else {
+                          navigate(item.path);
+                        }
+                      }}
+                      title={item.label} 
+                      style={{
+                        width: 52, height: 52, borderRadius: 14,
+                        background: item.active ? COLORS.purpleLight : "transparent",
+                        border: item.active ? `1px solid ${COLORS.purple}40` : "1px solid transparent",
+                        cursor: "pointer", display: "flex", flexDirection: "column",
+                        alignItems: "center", justifyContent: "center", gap: 3,
+                        transition: "all 0.2s", color: item.active ? COLORS.purple : COLORS.textMuted
+                      }}
+                      onMouseEnter={e => {
+                        if (!item.active) {
+                          e.currentTarget.style.background = "rgba(255,255,255,0.03)";
+                          e.currentTarget.style.color = "#FFF";
+                        }
+                      }}
+                      onMouseLeave={e => {
+                        if (!item.active) {
+                          e.currentTarget.style.background = "transparent";
+                          e.currentTarget.style.color = COLORS.textMuted;
+                        }
+                      }}
+                    >
+                      <span style={{ fontSize: 18 }}>{item.icon}</span>
+                      <span style={{ fontSize: 8, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5 }}>{item.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* CENTER STORY BOARD */}
+              <div style={{ minWidth: 0 }}>
+                
+                {/* Main Visual Comic Banner */}
+                <div style={{
+                  borderRadius: 24, overflow: "hidden",
+                  background: "linear-gradient(180deg, #100E26 0%, #06050F 100%)",
+                  position: "relative", aspectRatio: isMobile ? "4/3" : "21/9",
+                  marginBottom: 24, border: `1px solid ${COLORS.border}`,
+                  boxShadow: "0 15px 40px rgba(0,0,0,0.4)"
+                }}>
+                  {/* Rich Webtoon Illustration Cover */}
+                  <img 
+                    src={story.coverImage} 
+                    alt="Manhwa scene illustration"
+                    style={{
+                      width: "100%", height: "100%", objectFit: "cover",
+                      opacity: 0.85
+                    }}
+                  />
+                  {/* Cinematic Gradient Overlays */}
+                  <div style={{
+                    position: "absolute", inset: 0,
+                    background: "linear-gradient(to bottom, transparent 30%, rgba(5,4,10,0.85) 100%)",
+                  }} />
+                  
+                  {/* Glowing particle effect indicators */}
+                  <div style={{
+                    position: "absolute", top: 20, left: 20,
+                    background: "rgba(139,92,246,0.25)", border: `1px solid ${COLORS.purple}`,
+                    padding: "4px 10px", borderRadius: 8, fontSize: 11, fontWeight: 700,
+                    color: "#FFF", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", gap: 5
+                  }}>
+                    <Sparkles size={11} color={COLORS.purple} />
+                    <span>Interactive Story Pilot</span>
+                  </div>
+
+                  {/* Scene tag indicator */}
+                  <div style={{
+                    position: "absolute", top: 20, right: 20,
+                    background: "rgba(0,0,0,0.6)", border: `1px solid ${COLORS.border}`,
+                    padding: "4px 10px", borderRadius: 8, fontSize: 10, fontWeight: 700,
+                    color: COLORS.textMuted
+                  }}>
+                    Scene {activeScene}/10
+                  </div>
+
+                  {/* Premium Dialogue Bubble */}
+                  <div style={{
+                    position: "absolute", bottom: 20, left: 20, right: 20,
+                    background: "rgba(15, 13, 28, 0.85)", backdropFilter: "blur(12px)",
+                    border: `1px solid ${COLORS.purple}30`, borderRadius: 16,
+                    padding: "14px 20px", display: "flex", gap: 12, alignItems: "center",
+                    boxShadow: "0 8px 25px rgba(0,0,0,0.5)"
+                  }}>
+                    <div style={{
+                      width: 32, height: 32, borderRadius: 10,
+                      background: `linear-gradient(135deg, ${COLORS.purple}, ${COLORS.rose})`,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: 14, fontWeight: 800, color: "#FFF", flexShrink: 0
+                    }}>
+                      💬
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <span style={{ color: COLORS.purple, fontWeight: 800, fontSize: 13, textTransform: "uppercase", letterSpacing: 0.5 }}>
+                        {activeDialogue.speaker}:
+                      </span>
+                      <p style={{ margin: "3px 0 0", color: "#E5E7EB", fontSize: 13, lineHeight: 1.5, fontWeight: 500, fontFamily: "Georgia, serif", fontStyle: "italic" }}>
+                        "{activeDialogue.text}"
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Interactive Choices Section */}
+                <div style={{ marginBottom: 28 }}>
+                  <div style={{ textAlign: "center", marginBottom: 20 }}>
+                    <span style={{
+                      fontSize: isMobile ? 18 : 22, fontWeight: 900, color: "#FFF",
+                      fontFamily: "Georgia, serif", letterSpacing: 0.5, display: "flex", alignItems: "center", justifyContent: "center", gap: 8
+                    }}>
+                      <Sparkles size={18} color={COLORS.purple} /> ✦ What happens next? ✦
+                    </span>
+                  </div>
+
+                  {/* List of Choice Cards */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                    {choicesList.map(choice => {
+                      const isSelected = chosenLabel === choice.label;
+                      return (
+                        <div
+                          key={choice.label}
+                          onClick={() => handleChoice(choice)}
+                          style={{
+                            background: isSelected ? "rgba(139, 92, 246, 0.08)" : 
+                                        choice.isWrite ? "rgba(139, 92, 246, 0.02)" : COLORS.bgSubtle,
+                            border: isSelected ? `2.5px solid ${COLORS.purple}` :
+                                    choice.isWrite ? `1.5px dashed ${COLORS.purple}40` : `1.5px solid ${COLORS.border}`,
+                            borderRadius: 16, padding: "16px",
+                            cursor: "pointer", transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+                            boxShadow: isSelected ? `0 0 20px ${COLORS.purple}15` : "0 4px 10px rgba(0,0,0,0.15)"
+                          }}
+                          onMouseEnter={e => {
+                            if (!isSelected) {
+                              e.currentTarget.style.borderColor = COLORS.purple;
+                              e.currentTarget.style.transform = "translateY(-2px)";
+                            }
+                          }}
+                          onMouseLeave={e => {
+                            if (!isSelected) {
+                              e.currentTarget.style.borderColor = choice.isWrite ? `${COLORS.purple}40` : COLORS.border;
+                              e.currentTarget.style.transform = "translateY(0)";
+                            }
+                          }}
+                        >
+                          <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+                            {/* Round Badge Label */}
+                            <span style={{
+                              width: 34, height: 34, borderRadius: 10,
+                              background: choice.isWrite ? `${COLORS.purple}20` : `linear-gradient(135deg, ${COLORS.purple}, #A78BFA)`,
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              fontSize: 14, fontWeight: 900,
+                              color: choice.isWrite ? COLORS.purple : "#FFF", flexShrink: 0,
+                              boxShadow: choice.isWrite ? "none" : "0 4px 10px rgba(139,92,246,0.3)"
+                            }}>{choice.label}</span>
+                            
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 3 }}>
+                                <span style={{ fontWeight: 800, fontSize: 15, color: "#FFF" }}>{choice.title}</span>
+                                {choice.popular && (
+                                  <span style={{
+                                    background: `${COLORS.gold}15`, color: COLORS.gold, fontSize: 10,
+                                    padding: "2px 8px", borderRadius: 6, fontWeight: 700, display: "flex", alignItems: "center", gap: 3
+                                  }}>
+                                    <Flame size={10} fill={COLORS.gold} /> Popular
+                                  </span>
+                                )}
+                                {choice.ageRestricted && (
+                                  <span style={{
+                                    background: `${COLORS.rose}20`, color: COLORS.rose, fontSize: 10,
+                                    padding: "2px 8px", borderRadius: 6, fontWeight: 700
+                                  }}>
+                                    ⚠ 16+
+                                  </span>
+                                )}
+                              </div>
+                              
+                              <p style={{ color: COLORS.textMuted, fontSize: 13, margin: "0 0 8px", lineHeight: 1.5 }}>
+                                {choice.desc}
+                              </p>
+
+                              {/* Interactive write-in input representation */}
+                              {choice.isWrite && (
+                                <div style={{
+                                  display: "flex", alignItems: "center", gap: 8, marginTop: 8,
+                                  background: "rgba(0,0,0,0.2)", borderRadius: 10,
+                                  padding: "10px 14px", border: `1px solid ${COLORS.border}`
+                                }}>
+                                  <span style={{ color: COLORS.textMuted, fontSize: 12, flex: 1 }}>Type your plot twist and submit...</span>
+                                  <span style={{ color: COLORS.purple, fontSize: 14 }}>✏️</span>
+                                </div>
+                              )}
+
+                              {/* Tags & Meta */}
+                              {choice.tags.length > 0 && (
+                                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
+                                  {choice.tags.map(t => <Badge key={t} label={t} color={COLORS.purple} />)}
+                                  <span style={{ color: COLORS.textMuted, fontSize: 11, display: "flex", alignItems: "center", gap: 4, marginLeft: 6 }}>
+                                    🔥 {((choice.votes / totalVotes) * 100 || 25).toFixed(1)}% of readers chose this
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                            <ChevronRight size={20} color="rgba(255,255,255,0.2)" style={{ marginTop: 8 }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Interactive Unlock Panel */}
+                <AnimatePresence>
+                  {showUnlock && (
+                    <motion.div 
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      style={{
+                        background: "linear-gradient(135deg, #120D2A, #06050F)",
+                        border: `1.5px solid ${COLORS.purple}50`,
+                        borderRadius: 20, padding: "24px", marginBottom: 24,
+                        position: "relative", overflow: "hidden",
+                        boxShadow: "0 10px 30px rgba(139,92,246,0.15)"
+                      }}
+                    >
+                      <div style={{ display: "flex", gap: 14, alignItems: "flex-start", marginBottom: 12 }}>
+                        <div style={{
+                          width: 44, height: 44, borderRadius: 12,
+                          background: "rgba(139,92,246,0.15)", border: `1px solid ${COLORS.purple}`,
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          fontSize: 20, flexShrink: 0
+                        }}>
+                          📖
+                        </div>
+                        <div>
+                          <h3 style={{ margin: 0, color: "#FFF", fontSize: 16, fontWeight: 800 }}>Storyline Unlocked!</h3>
+                          <p style={{ margin: "4px 0 0", color: COLORS.textMuted, fontSize: 13, lineHeight: 1.5 }}>
+                            Your decision has opened a new pathway. Are you ready to see the consequences of your choice?
+                          </p>
+                        </div>
+                      </div>
+
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center", marginTop: 16 }}>
+                        <button 
+                          onClick={() => handleProceedToScene(5)}
+                          style={{
+                            background: `linear-gradient(135deg, ${COLORS.purple}, #A78BFA)`,
+                            border: "none", color: "#FFF", padding: "12px 24px",
+                            borderRadius: 12, fontWeight: 700, cursor: "pointer", fontSize: 13,
+                            boxShadow: `0 4px 15px ${COLORS.purple}40`, transition: "all 0.2s"
+                          }}
+                          onMouseEnter={e => e.currentTarget.style.transform = "translateY(-1px)"}
+                          onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}
+                        >
+                          Continue to Scene 5 →
+                        </button>
+                        
+                        {chosenLabel !== "D" && (
+                          <span style={{ color: COLORS.textMuted, fontSize: 12 }}>
+                            or explore other choices below!
+                          </span>
+                        )}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Interactive Live Polling (Fan Vote) */}
+                <div style={{
+                  background: COLORS.bgSubtle, border: `1px solid ${COLORS.border}`, borderRadius: 20,
+                  padding: "20px", marginBottom: 24, boxShadow: "0 4px 15px rgba(0,0,0,0.1)"
+                }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                    <div style={{ fontWeight: 800, fontSize: 15, color: "#FFF", display: "flex", alignItems: "center", gap: 8 }}>
+                      📊 Fan Vote Poll <Badge label="Live Results" color={COLORS.rose} />
+                    </div>
+                    <span style={{ color: COLORS.textMuted, fontSize: 12, fontWeight: 600 }}>Total: {totalVotes.toLocaleString()} votes</span>
+                  </div>
+                  
+                  <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                    {choicesList.map(c => {
+                      const percentage = totalVotes > 0 ? (c.votes / totalVotes) * 100 : 25;
+                      const isSelected = chosenLabel === c.label;
+                      return (
+                        <div key={c.label}>
+                          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5, fontSize: 13 }}>
+                            <span style={{ color: isSelected ? COLORS.purple : "#FFF", fontWeight: isSelected ? 800 : 600 }}>
+                              {c.label} · {c.title} {isSelected && " (Your Vote)"}
+                            </span>
+                            <span style={{ fontWeight: 700, color: isSelected ? COLORS.purple : COLORS.textMuted }}>
+                              {percentage.toFixed(1)}%
+                            </span>
+                          </div>
+                          {/* Bar Tracker */}
+                          <div style={{ height: 8, background: "rgba(0,0,0,0.25)", borderRadius: 6, overflow: "hidden", border: `1px solid ${COLORS.border}` }}>
+                            <motion.div 
+                              initial={{ width: 0 }}
+                              animate={{ width: `${percentage}%` }}
+                              transition={{ duration: 0.6, ease: "easeOut" }}
+                              style={{
+                                height: "100%",
+                                background: isSelected 
+                                  ? `linear-gradient(90deg, ${COLORS.purple}, ${COLORS.rose})` 
+                                  : `linear-gradient(90deg, rgba(139,92,246,0.35), rgba(139,92,246,0.15))`,
+                                borderRadius: 6
+                              }} 
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Scene Traversal Buttons */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
+                  <button 
+                    onClick={() => handleProceedToScene(4)}
+                    disabled={activeScene === 4}
+                    style={{
+                      display: "flex", alignItems: "center", gap: 8,
+                      background: "transparent", border: `1px solid ${COLORS.border}`,
+                      color: activeScene === 4 ? "rgba(255,255,255,0.15)" : "#FFF", 
+                      padding: "10px 18px", borderRadius: 12, cursor: activeScene === 4 ? "not-allowed" : "pointer", 
+                      fontSize: 13, fontWeight: 700, transition: "all 0.2s"
+                    }}
+                    onMouseEnter={e => { if(activeScene > 4) e.currentTarget.style.borderColor = COLORS.purple; }}
+                    onMouseLeave={e => { if(activeScene > 4) e.currentTarget.style.borderColor = COLORS.border; }}
+                  >
+                    ← Previous Scene
+                  </button>
+                  
+                  <button style={{
+                    display: "flex", alignItems: "center", gap: 6, color: COLORS.rose,
+                    background: "transparent", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600
+                  }}>
+                    <AlertTriangle size={12} /> Report Scene
+                  </button>
+                </div>
+
+                {/* Comments Section */}
+                <div style={{
+                  background: COLORS.bgSubtle, border: `1px solid ${COLORS.border}`, borderRadius: 20,
+                  padding: "20px", marginBottom: 24, boxShadow: "0 4px 15px rgba(0,0,0,0.1)"
+                }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+                    <div style={{ fontWeight: 800, fontSize: 16, color: "#FFF", display: "flex", alignItems: "center", gap: 8 }}>
+                      <MessageSquare size={16} color={COLORS.purple} /> 💬 Reader Discussions ({comments.length})
+                    </div>
+                    <Badge label="Top Comments" color={COLORS.purple} />
+                  </div>
+
+                  {/* Comment Form Input */}
+                  <form onSubmit={handlePostComment} style={{ display: "flex", gap: 10, marginBottom: 24, alignItems: "flex-start" }}>
+                    <Avatar initials="YO" size={34} color={COLORS.purple} />
+                    <div style={{ flex: 1, position: "relative" }}>
+                      <input
+                        type="text"
+                        value={commentText}
+                        onChange={e => setCommentText(e.target.value)}
+                        placeholder="Share your thoughts on this scene choice..."
+                        style={{
+                          width: "100%", background: "rgba(0,0,0,0.2)",
+                          border: `1px solid ${COLORS.border}`, borderRadius: 12,
+                          color: "#FFF", padding: "12px 48px 12px 14px", fontSize: 13,
+                          outline: "none", boxSizing: "border-box", transition: "all 0.2s"
+                        }}
+                        onFocus={e => e.target.style.borderColor = COLORS.purple}
+                        onBlur={e => e.target.style.borderColor = COLORS.border}
+                      />
+                      <button
+                        type="submit"
+                        style={{
+                          position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)",
+                          background: COLORS.purple, border: "none", width: 32, height: 32,
+                          borderRadius: 10, color: "#FFF", display: "flex", alignItems: "center",
+                          justifyContent: "center", cursor: "pointer", boxShadow: `0 2px 8px ${COLORS.purple}40`
+                        }}
+                      >
+                        <Send size={12} />
+                      </button>
+                    </div>
+                  </form>
+
+                  {/* Comments List */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                    <AnimatePresence initial={false}>
+                      {comments.map((c, i) => (
+                        <motion.div 
+                          key={c.id}
+                          initial={{ opacity: 0, y: 15 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.95 }}
+                          transition={{ duration: 0.25 }}
+                          style={{
+                            display: "flex", gap: 12, padding: "16px 0",
+                            borderBottom: i < comments.length - 1 ? `1px solid ${COLORS.border}` : "none",
+                          }}
+                        >
+                          <Avatar initials={c.avatar} size={34} color={c.user === 'You' ? COLORS.purple : "#6B7280"} />
+                          <div style={{ flex: 1 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                              <span style={{ fontWeight: 800, fontSize: 13, color: "#FFF" }}>{c.user}</span>
+                              {c.user !== 'You' && <Badge label={`Lv.${c.level}`} color="#9CA3AF" style={{ fontSize: 9 }} />}
+                              <span style={{ color: COLORS.textMuted, fontSize: 11 }}>{c.time}</span>
+                            </div>
+                            
+                            <p style={{ color: "#E5E7EB", fontSize: 13, margin: "0 0 8px", lineHeight: 1.5 }}>{c.text}</p>
+                            
+                            <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+                              {/* Interactive Likes button with bouncy scale */}
+                              <button 
+                                onClick={() => handleLikeComment(c.id)}
+                                style={{ 
+                                  color: c.isLiked ? COLORS.rose : COLORS.textMuted, 
+                                  background: "none", border: "none", cursor: "pointer", 
+                                  fontSize: 12, display: "flex", alignItems: "center", gap: 4,
+                                  fontWeight: 600, padding: 0
+                                }}
+                              >
+                                <Heart size={12} fill={c.isLiked ? COLORS.rose : "none"} /> 
+                                <span>{c.likes}</span>
+                              </button>
+                              
+                              <button 
+                                onClick={() => setActiveReplyId(activeReplyId === c.id ? null : c.id)}
+                                style={{ 
+                                  color: COLORS.purple, background: "none", border: "none", 
+                                  cursor: "pointer", fontSize: 12, fontWeight: 600, padding: 0 
+                                }}
+                              >
+                                Reply
+                              </button>
+                            </div>
+
+                            {/* Expandable Reply Box */}
+                            {activeReplyId === c.id && (
+                              <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+                                <input 
+                                  type="text"
+                                  value={replyText}
+                                  onChange={e => setReplyText(e.target.value)}
+                                  placeholder="Write a reply..."
+                                  style={{
+                                    flex: 1, background: "rgba(0,0,0,0.15)",
+                                    border: `1px solid ${COLORS.border}`, borderRadius: 8,
+                                    color: "#FFF", padding: "8px 12px", fontSize: 12, outline: "none"
+                                  }}
+                                />
+                                <button 
+                                  onClick={() => handleReplySubmit(c.id)}
+                                  style={{
+                                    background: COLORS.purple, border: "none", color: "#FFF",
+                                    borderRadius: 8, padding: "0 14px", fontSize: 12, fontWeight: 700, cursor: "pointer"
+                                  }}
+                                >Post</button>
+                              </div>
+                            )}
+                          </div>
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                </div>
+              </div>
+
+              {/* ─── RIGHT COLUMN SIDEBAR (Desktop) ─── */}
+              {!isMobile && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 20, position: "sticky", top: 150 }}>
+                  
+                  {/* Custom Interactive You Chose Panel */}
+                  {chosenLabel && (
+                    <div style={{
+                      background: "linear-gradient(135deg, #120D2A, #06050F)",
+                      border: `1.5px solid ${COLORS.purple}`,
+                      borderRadius: 20, padding: "16px",
+                      boxShadow: "0 10px 25px rgba(139,92,246,0.15)"
+                    }}>
+                      <span style={{ fontSize: 9, fontWeight: 800, color: COLORS.purple, letterSpacing: 1.5, display: "block", marginBottom: 8, textTransform: "uppercase" }}>Your Selection</span>
+                      
+                      <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 12 }}>
+                        <span style={{
+                          width: 28, height: 28, borderRadius: 8,
+                          background: `linear-gradient(135deg, ${COLORS.purple}, #A78BFA)`,
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          fontSize: 12, fontWeight: 900, color: "#FFF"
+                        }}>{chosenLabel}</span>
+                        <div>
+                          <h4 style={{ margin: 0, color: "#FFF", fontSize: 14, fontWeight: 850 }}>
+                            {choicesList.find(c => c.label === chosenLabel)?.title}
+                          </h4>
+                          <span style={{ color: COLORS.textMuted, fontSize: 11 }}>Active path: Scene {activeScene}</span>
+                        </div>
+                      </div>
+                      
+                      <p style={{ color: COLORS.textMuted, fontSize: 12, lineHeight: 1.4, margin: "0 0 12px" }}>
+                        {choicesList.find(c => c.label === chosenLabel)?.desc}
+                      </p>
+
+                      <button 
+                        onClick={() => handleProceedToScene(5)}
+                        style={{
+                          width: "100%", background: COLORS.purple, border: "none",
+                          color: "#FFF", padding: "10px 0", borderRadius: 10,
+                          fontSize: 12, fontWeight: 700, cursor: "pointer",
+                          boxShadow: `0 4px 10px ${COLORS.purple}30`
+                        }}
+                      >
+                        Proceed to Scene 5 →
+                      </button>
+                    </div>
+                  )}
+
+                  {/* About Creator Profile */}
+                  <div style={{
+                    background: COLORS.bgSubtle, border: `1px solid ${COLORS.border}`, borderRadius: 20, padding: "18px",
+                  }}>
+                    <div style={{ fontWeight: 800, fontSize: 14, color: "#FFF", marginBottom: 14 }}>About the Creator</div>
+                    
+                    <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 12 }}>
+                      <Avatar initials="SI" size={38} color={COLORS.purple} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                          <span style={{ fontWeight: 800, fontSize: 14, color: "#FFF", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>{story.author}</span>
+                          <span style={{ color: COLORS.purple, fontSize: 12 }}>✓</span>
+                        </div>
+                        <div style={{ color: COLORS.textMuted, fontSize: 12 }}>{authorFollowers.toLocaleString()} Followers</div>
+                      </div>
+                      
+                      <button 
+                        onClick={toggleFollow}
+                        style={{
+                          background: isFollowing ? COLORS.purple : "transparent",
+                          border: `1.5px solid ${COLORS.purple}`, color: "#FFF",
+                          padding: "6px 14px", borderRadius: 12, cursor: "pointer", fontSize: 11, fontWeight: 700,
+                          transition: "all 0.2s"
+                        }}
+                      >
+                        {isFollowing ? "Following" : "Follow"}
+                      </button>
+                    </div>
+
+                    <p style={{ color: COLORS.textMuted, fontSize: 12, lineHeight: 1.5, margin: "0 0 12px" }}>
+                      {story.authorBio}
+                    </p>
+                    
+                    <button style={{ color: COLORS.purple, background: "none", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700, padding: 0 }}>
+                      View Creator Profile →
+                    </button>
+                  </div>
+
+                  {/* Story Map (Desktop Sidebar) */}
+                  <StoryMap 
+                    nodes={storyNodes} 
+                    activeScene={activeScene} 
+                    onSelectScene={handleProceedToScene}
+                    onSelectChoice={(b) => {
+                      const fullChoice = choicesList.find(c => c.label === b.label);
+                      if (fullChoice) handleChoice(fullChoice);
+                    }}
+                    chosenLabel={chosenLabel}
+                    isMobile={false} 
+                  />
+
+                  {/* Interactive Vault list */}
+                  <VaultPanel 
+                    stories={vaultStories} 
+                    onRemove={handleVaultToggle}
+                    onNavigate={(id) => triggerToast("Viewing story details from Vault...")}
+                  />
+
+                </div>
+              )}
+            </div>
+
+            {/* MOBILE BOTTOM STORY MAP & VAULT (only on mobile layout) */}
+            {isMobile && (
+              <div style={{ padding: "0 16px 24px", display: "flex", flexDirection: "column", gap: 20 }}>
+                <StoryMap 
+                  nodes={storyNodes} 
+                  activeScene={activeScene} 
+                  onSelectScene={handleProceedToScene}
+                  onSelectChoice={(b) => {
+                    const fullChoice = choicesList.find(c => c.label === b.label);
+                    if (fullChoice) handleChoice(fullChoice);
+                  }}
+                  chosenLabel={chosenLabel}
+                  isMobile={true} 
+                />
+                <VaultPanel 
+                  stories={vaultStories} 
+                  onRemove={handleVaultToggle}
+                  onNavigate={(id) => triggerToast("Viewing story details from Vault...")}
+                />
               </div>
             )}
 
-            {/* About Creator Profile */}
-            <div style={{
-              background: COLORS.bgSubtle, border: `1px solid ${COLORS.border}`, borderRadius: 20, padding: "18px",
-            }}>
-              <div style={{ fontWeight: 800, fontSize: 14, color: "#FFF", marginBottom: 14 }}>About the Creator</div>
-              
-              <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 12 }}>
-                <Avatar initials="SI" size={38} color={COLORS.purple} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                    <span style={{ fontWeight: 800, fontSize: 14, color: "#FFF", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>{story.author}</span>
-                    <span style={{ color: COLORS.purple, fontSize: 12 }}>✓</span>
-                  </div>
-                  <div style={{ color: COLORS.textMuted, fontSize: 12 }}>{authorFollowers.toLocaleString()} Followers</div>
-                </div>
-                
-                <button 
-                  onClick={toggleFollow}
-                  style={{
-                    background: isFollowing ? COLORS.purple : "transparent",
-                    border: `1.5px solid ${COLORS.purple}`, color: "#FFF",
-                    padding: "6px 14px", borderRadius: 12, cursor: "pointer", fontSize: 11, fontWeight: 700,
-                    transition: "all 0.2s"
-                  }}
-                >
-                  {isFollowing ? "Following" : "Follow"}
-                </button>
+            {/* ─── Mobile Bottom Sticky Nav ─── */}
+            {isMobile && (
+              <div style={{
+                position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 200,
+                background: "rgba(11, 10, 20, 0.95)", backdropFilter: "blur(12px)",
+                borderTop: `1px solid ${COLORS.border}`,
+                display: "flex", justifyContent: "space-around",
+                padding: "10px 0 20px",
+              }}>
+                {[
+                  { icon: "🏠", label: "Home", path: "/" },
+                  { icon: "🔍", label: "Explore", path: "/browse" },
+                  { icon: "🗃️", label: "Vault", path: "/dashboard", active: true },
+                  { icon: "✏️", label: "Create", path: "/creators" },
+                  { icon: "👤", label: "Profile", path: "/dashboard" },
+                ].map(item => (
+                  <button 
+                    key={item.label} 
+                    onClick={() => navigate(item.path)}
+                    style={{
+                      display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
+                      background: "none", border: "none", cursor: "pointer",
+                    }}
+                  >
+                    <span style={{ fontSize: 18, color: item.active ? COLORS.purple : COLORS.textMuted }}>{item.icon}</span>
+                    <span style={{
+                      fontSize: 9, fontWeight: 700,
+                      color: item.active ? COLORS.purple : COLORS.textMuted,
+                      textTransform: "uppercase"
+                    }}>{item.label}</span>
+                  </button>
+                ))}
               </div>
+            )}
 
-              <p style={{ color: COLORS.textMuted, fontSize: 12, lineHeight: 1.5, margin: "0 0 12px" }}>
-                {story.authorBio}
-              </p>
-              
-              <button style={{ color: COLORS.purple, background: "none", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700, padding: 0 }}>
-                View Creator Profile →
-              </button>
-            </div>
-
-            {/* Story Map (Desktop Sidebar) */}
-            <StoryMap 
-              nodes={storyNodes} 
-              activeScene={activeScene} 
-              onSelectScene={handleProceedToScene}
-              onSelectChoice={(b) => {
-                const fullChoice = choicesList.find(c => c.label === b.label);
-                if (fullChoice) handleChoice(fullChoice);
-              }}
-              chosenLabel={chosenLabel}
-              isMobile={false} 
-            />
-
-            {/* Interactive Vault list */}
-            <VaultPanel 
-              stories={vaultStories} 
-              onRemove={handleVaultToggle}
-              onNavigate={(id) => triggerToast("Viewing story details from Vault...")}
-            />
-
-          </div>
+            <Footer />
+          </motion.div>
         )}
-      </div>
-
-      {/* MOBILE BOTTOM STORY MAP & VAULT (only on mobile layout) */}
-      {isMobile && (
-        <div style={{ padding: "0 16px 24px", display: "flex", flexDirection: "column", gap: 20 }}>
-          <StoryMap 
-            nodes={storyNodes} 
-            activeScene={activeScene} 
-            onSelectScene={handleProceedToScene}
-            onSelectChoice={(b) => {
-              const fullChoice = choicesList.find(c => c.label === b.label);
-              if (fullChoice) handleChoice(fullChoice);
-            }}
-            chosenLabel={chosenLabel}
-            isMobile={true} 
-          />
-          <VaultPanel 
-            stories={vaultStories} 
-            onRemove={handleVaultToggle}
-            onNavigate={(id) => triggerToast("Viewing story details from Vault...")}
-          />
-        </div>
-      )}
-
-      {/* ─── Mobile Bottom Sticky Nav ─── */}
-      {isMobile && (
-        <div style={{
-          position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 200,
-          background: "rgba(11, 10, 20, 0.95)", backdropFilter: "blur(12px)",
-          borderTop: `1px solid ${COLORS.border}`,
-          display: "flex", justifyContent: "space-around",
-          padding: "10px 0 20px",
-        }}>
-          {[
-            { icon: "🏠", label: "Home", path: "/" },
-            { icon: "🔍", label: "Explore", path: "/browse" },
-            { icon: "🗃️", label: "Vault", path: "/dashboard", active: true },
-            { icon: "✏️", label: "Create", path: "/creators" },
-            { icon: "👤", label: "Profile", path: "/dashboard" },
-          ].map(item => (
-            <button 
-              key={item.label} 
-              onClick={() => navigate(item.path)}
-              style={{
-                display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
-                background: "none", border: "none", cursor: "pointer",
-              }}
-            >
-              <span style={{ fontSize: 18, color: item.active ? COLORS.purple : COLORS.textMuted }}>{item.icon}</span>
-              <span style={{
-                fontSize: 9, fontWeight: 700,
-                color: item.active ? COLORS.purple : COLORS.textMuted,
-                textTransform: "uppercase"
-              }}>{item.label}</span>
-            </button>
-          ))}
-        </div>
-      )}
-
-      <Footer />
+      </AnimatePresence>
     </div>
   );
 }
