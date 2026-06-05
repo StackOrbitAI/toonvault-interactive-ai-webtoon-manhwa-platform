@@ -271,6 +271,31 @@ export default function StoryPage() {
     }
   }, []);
 
+  useEffect(() => {
+    if (userData && story) {
+      setIsFollowing(!!(userData.following && userData.following.includes(story.authorName)));
+    }
+  }, [userData, story]);
+
+  const handleToggleFollow = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return navigate('/login');
+      if (!story || !story.authorName) return;
+      const res = await axios.post(`/api/users/follow/${story.authorName}`, {}, { headers: { 'Authorization': `Bearer ${token}` } });
+      setUserData(prev => ({
+        ...prev,
+        following: res.data.following 
+          ? [...(prev?.following || []), story.authorName]
+          : (prev?.following || []).filter(f => f !== story.authorName)
+      }));
+      setIsFollowing(res.data.following);
+      triggerToast(res.data.message);
+    } catch (err) {
+      triggerToast(err.response?.data?.error || "Error toggling follow");
+    }
+  };
+
   const handleToggleBookmark = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -953,10 +978,10 @@ export default function StoryPage() {
                     
                     <div style={{ display: "flex", gap: 10, flexDirection: isMobile ? "column" : "row" }}>
                       <button 
-                        onClick={() => { setIsFollowing(!isFollowing); triggerToast(isFollowing ? "No longer following" : "Following architect!"); }} 
+                        onClick={handleToggleFollow} 
                         style={{ flex: 1, padding: "12px 16px", borderRadius: 12, background: isFollowing ? "rgba(255,255,255,0.06)" : COLORS.purple, border: `1.5px solid ${isFollowing ? COLORS.border : COLORS.purple}`, color: "#FFF", fontWeight: 700, cursor: "pointer", fontSize: 14, transition: 'all 0.3s', boxShadow: isFollowing ? 'none' : `0 10px 20px ${COLORS.purple}30` }}
                       >
-                        {isFollowing ? "Bonded" : "Follow Architect"}
+                        {isFollowing ? "Bonded (Following)" : `Follow ${story?.authorName || "Creator"}`}
                       </button>
                       <button style={{ width: isMobile ? "100%" : 44, height: 44, borderRadius: 12, background: "rgba(255,255,255,0.06)", border: `1px solid ${COLORS.border}`, display: "flex", alignItems: "center", justifyContent: "center", color: "#FFF", cursor: "pointer" }}>
                          <Share2 size={16} /> {isMobile && <span style={{ marginLeft: 8, fontSize: 14, fontWeight: 700 }}>Share</span>}

@@ -320,10 +320,41 @@ router.post('/generate-episode', auth, async (req, res) => {
         const story = await Story.findById(storyId);
         if (!story) return res.status(404).json({ error: "Story not found" });
 
-        // Continuity Context
+        // Continuity Context: Feed previous dialogues & panels to maintain strict narrative alignment
+        let previousEpisodesContext = "";
+        if (story.episodes && story.episodes.length > 0) {
+            previousEpisodesContext = story.episodes.map(ep => {
+                let panelsText = "";
+                try {
+                    const parsed = JSON.parse(ep.content);
+                    if (Array.isArray(parsed)) {
+                        panelsText = parsed.map(p => `${p.speaker}: "${p.text}"`).join('\n');
+                    } else {
+                        panelsText = ep.content;
+                    }
+                } catch (e) {
+                    panelsText = ep.content || "";
+                }
+                return `--- Episode ${ep.number}: ${ep.title} ---\n${panelsText}`;
+            }).join('\n\n');
+        } else {
+            try {
+                const parsed = JSON.parse(story.content);
+                if (Array.isArray(parsed)) {
+                    previousEpisodesContext = `--- Episode 1 ---\n` + parsed.map(p => `${p.speaker}: "${p.text}"`).join('\n');
+                }
+            } catch (e) {}
+        }
+
         const context = `This is the next episode of the story "${story.title}". 
         Summary: ${story.description}. 
-        User wants this to happen next: ${userPrompt || "Continue the plot naturally."}`;
+        
+        Previous Episodes History:
+        ${previousEpisodesContext}
+        
+        User wants this to happen in the next episode: ${userPrompt || "Continue the plot naturally."}
+        
+        CRITICAL: Maintain strict continuity with character names, their speech style, and plot details from the history listed above.`;
 
         // 1. Generate next episode content with Mistral
         const mistralResp = await axios.post('https://api.mistral.ai/v1/chat/completions', {
@@ -391,7 +422,9 @@ router.post('/generate-episode', auth, async (req, res) => {
             });
         }
 
-        const episodeNumber = (story.episodes?.length || 0) + 2; 
+        const episodeNumber = story.episodes && story.episodes.length > 0 
+            ? (Math.max(...story.episodes.map(e => e.number || 0)) + 1) 
+            : 2; 
         
         const newEpisode = {
             number: episodeNumber,

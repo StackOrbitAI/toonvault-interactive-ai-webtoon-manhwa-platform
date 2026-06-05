@@ -168,5 +168,28 @@ router.delete('/read-nodes/:storyId/:nodeId', auth, async (req, res) => {
     }
 });
 
+// Toggle Follow Creator
+router.post('/follow/:username', auth, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id);
+        const targetUsername = req.params.username;
+        if (!user.following) {
+            user.following = [];
+        }
+        const index = user.following.indexOf(targetUsername);
+        if (index === -1) {
+            user.following.push(targetUsername);
+            await user.save();
+            res.json({ message: `Following ${targetUsername}`, following: true });
+        } else {
+            user.following.splice(index, 1);
+            await user.save();
+            res.json({ message: `Unfollowed ${targetUsername}`, following: false });
+        }
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 module.exports = router;
 

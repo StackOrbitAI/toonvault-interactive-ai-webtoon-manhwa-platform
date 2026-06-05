@@ -31,6 +31,7 @@ const UserSchema = new mongoose.Schema({
         readAt: { type: Date, default: Date.now }
     }],
     bookmarks: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Story' }],
+    following: [{ type: String }],
     createdAt: { type: Date, default: Date.now }
 });
 
