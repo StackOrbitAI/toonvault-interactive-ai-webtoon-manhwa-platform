@@ -9,6 +9,22 @@ ToonVault is a state-of-the-art interactive manhwa (webtoon) publishing and read
 
 ---
 
+## 📸 Visual Preview
+
+### 🖥️ Homepage & Explore
+*Discover new and popular stories with dynamic badges, views, ratings, and active creator updates.*
+![ToonVault Homepage](./screenshots/homepage.png)
+
+### 📖 Story Details & Choice Traversal
+*Browse story details, navigate branching pathways, cast live community poll votes, and participate in discussion threads.*
+![ToonVault Story Page](./screenshots/story_page.png)
+
+### 📱 Immersive Vertical Webtoon Reader
+*Read seamlessly with a vertical scroll reader featuring dynamic text, floating interactive dialogues, and custom ending path submissions.*
+![ToonVault Reader Page](./screenshots/reader_page.png)
+
+---
+
 ## 🌟 Key Features
 
 1. **🎬 Immersive Webtoon Scroll Reader**
