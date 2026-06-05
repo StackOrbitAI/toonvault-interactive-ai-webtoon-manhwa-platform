@@ -1,237 +1,188 @@
-<br># ToonVault 🎭
+# 🌌 ToonVault — Interactive Manhwa Storytelling Platform
 
-**ToonVault** is a professional AI-powered interactive storytelling and webtoon/manhwa platform — where readers read stories with cinematic panel overlays, quotes, and an episode-by-episode reading experience. Creators use Runware AI and Mistral AI to generate stunning Manhwa-style story panels automatically.
+[![Version](https://img.shields.io/badge/version-1.0.0-purple.svg?style=flat-square)](#)
+[![Docker](https://img.shields.io/badge/docker-ready-blue.svg?style=flat-square)](#)
+[![StackOrbitAI](https://img.shields.io/badge/powered%20by-StackOrbitAI-orange.svg?style=flat-square)](https://github.com/StackOrbitAI)
+[![Live URL](https://img.shields.io/badge/live-toonvault.com-emerald.svg?style=flat-square)](http://toonvault.com/)
 
-🌐 **Live Demo:** [toonvault.com](http://toonvault.com/)
-
----
-
-## ✨ Features
-
-### For Readers
-- 📖 **Vertical Scroll Reader** — Webtoon/Manhwa-style full-width panel reading experience
-- 💬 **Quote Overlays** — Each panel displays narration or character dialogue as cinematic overlays
-- 🗺️ **Story Map** — Visual quest map of all episodes and scenes with status icons (read/unread/bookmarked)
-- 📺 **Episode Navigation** — Previous/Next episode with sticky header and scroll progress bar
-- 🔞 **Mature Content Gate** — Age verification modal for 18+ stories
-- ⭐ **Rating & Likes** — Real-time like/dislike system with Redis-backed rankings
-
-### For Creators
-- 🤖 **AI Story Generator** — Describe a topic → Mistral AI writes the script, Runware AI generates all panels
-- 🎨 **ToonVault Manhwa Engine v1** — `runware:100@1` model, 704×1024px, 28 steps, CFG 7 for ultra-detailed Korean manhwa art
-- 📝 **Manual Story Tool** — Create and publish custom stories with your own episodes
-- 🗂️ **Admin Dashboard** — Manage stories, users, settings, and API keys
-
-### Platform
-- 🔐 **JWT Authentication** — Secure login/signup with role-based access (admin/creator/reader)
-- 📡 **Real-time Updates** — Socket.IO for live reader counts and notifications
-- 🏆 **Live Rankings** — Redis sorted set for real-time story rankings
-- 🌐 **Full-Stack Docker** — One-command deployment with Docker Compose
+ToonVault is a state-of-the-art interactive manhwa (webtoon) publishing and reading platform where readers guide the destiny of the characters. Every choice unlocks a custom narrative outcome, live poll trackers, and scroll-triggered vertical comic scroll episodes. Powered by advanced generative AI for visual content and script narrative structure.
 
 ---
 
-## 🛠️ Tech Stack
+## 🌟 Key Features
 
-| Layer | Technology |
-|---|---|
-| **Frontend** | React 18, Vite, Framer Motion, Lucide Icons |
-| **Backend** | Node.js, Express.js |
-| **Databases** | MongoDB (stories/content), PostgreSQL (users/payments), Redis (rankings/sessions) |
-| **AI Images** | [Runware AI](https://runware.ai/) — `runware:100@1` (FLUX.1) |
-| **AI Writing** | [Mistral AI](https://mistral.ai/) — `mistral-small-latest` |
-| **Deployment** | Docker Compose, Nginx (reverse proxy), Let's Encrypt (SSL) |
-| **Real-time** | Socket.IO |
+1. **🎬 Immersive Webtoon Scroll Reader**
+   - Continuous vertical scroll format optimized for both desktop and mobile devices.
+   - Dynamic **Manhwa Speech Bubbles & Narrations** that float and slide up into place as the reader scrolls them into view using `framer-motion` animations.
+   - Cinematic bottom-gradient overlay for narrations and interactive speech bubbles for characters.
+   - Live scroll-progress tracking indicator.
+
+2. **🛤️ Branching Storyline & Choice Traversal**
+   - Interactive choice pathways (A, B, C) that instantly swap panels and dialogue text on-screen.
+   - **Write Your Own Pathway (Choice D)**: Custom text submission updates dialogues dynamically to explore custom, user-written endings.
+   - Interactive quest map permitting readers to explore unlocked pathways or navigate backward.
+
+3. **📊 Live Polling & Fan Vote Tracker**
+   - Cast votes instantly upon selecting any narrative branch.
+   - Live result graphs updating percentages with smooth animations to show community preferences.
+
+4. **💬 Dynamic Social & Discussion Panels**
+   - Full discussion boards supporting comment likes, creator follows, and nested inline replies.
+   - Vault bookmarks letting readers store stories and track current progress.
+
+5. **⚙️ ToonVault Manhwa Engine v1 (AI-Generated Comics)**
+   - Custom generator scripts utilizing **Runware AI** (FLUX.1 model) for vertical webtoon panels.
+   - High-fidelity **Mistral AI** integration for automated story structuring, dialogue, and image prompt generation.
+
+---
+
+## 🏛️ System Architecture
+
+ToonVault is built as a microservices architecture orchestrated with Docker.
+
+```mermaid
+graph TD
+    Client[Web Client: React + Vite] <-->|HTTP/WS| Nginx[Nginx Reverse Proxy]
+    Nginx <-->|Port 80/443| Backend[Express Backend API]
+    Backend <-->|SQL Data| Postgres[(PostgreSQL)]
+    Backend <-->|NoSQL Stories| Mongo[(MongoDB)]
+    Backend <-->|Caching & Stats| Redis[(Redis)]
+    Backend <-->|Script Generation| Mistral[Mistral AI API]
+    Backend <-->|Visual Generation| Runware[Runware AI API]
+```
+
+### Technology Stack
+* **Frontend**: React.js (Vite), Framer Motion, Lucide Icons, Axios, Tailwind CSS.
+* **Backend**: Node.js, Express.js, Mongoose, Sequelize.
+* **Primary SQL DB**: PostgreSQL (User management, follow stats, and transaction logs).
+* **NoSQL DB**: MongoDB (Chapters, panels metadata, story dialogues, and interactive maps).
+* **Caching & High-Speed Cache**: Redis (Likes sets, live story rankings, active poll trackers).
+* **WebServer & Proxy**: Nginx (Reverse proxy mapping frontend routes and backend APIs securely).
+* **Containerization**: Docker, Docker Compose.
 
 ---
 
 ## 🚀 Quick Start (Local Development)
 
 ### Prerequisites
-- Docker & Docker Compose
-- Node.js 18+ (for local frontend dev)
+Make sure you have [Node.js (v18+)](https://nodejs.org/) and [Docker](https://www.docker.com/) installed.
 
-### 1. Clone the repository
+### 1. Clone the Project
 ```bash
 git clone https://github.com/StackOrbitAI/toonvault.git
 cd toonvault
 ```
 
-### 2. Set up environment variables
+### 2. Configure Environment Variables
+Create a `.env` file inside the `backend/` directory:
 ```bash
-cp .env.example .env
-# Edit .env with your API keys
+# Database & Caching
+MONGO_URI=mongodb://mongo:27017/toonvault
+DATABASE_URL=postgres://user:password@db:5432/toonvault
+REDIS_URL=redis://redis:6379
+
+# AI Engines API Keys
+MISTRAL_API_KEY=your_mistral_api_key
+RUNWARE_API_KEY=your_runware_api_key
+RUNWARE_MODEL=runware:100@1
+
+# System Settings
+PORT=5000
+JWT_SECRET=your_jwt_secret_key
 ```
 
-Required keys:
-- `RUNWARE_API_KEY` — [Get at runware.ai](https://my.runware.ai/)
-- `MISTRAL_API_KEY` — [Get at mistral.ai](https://console.mistral.ai/)
-- `JWT_SECRET` — Any random 32+ character string
-
-### 3. Start all services
+Create a `.env` file inside the `frontend/` directory:
 ```bash
-docker compose up --build
+VITE_API_BASE=http://localhost:5000
 ```
 
-The app will be available at **http://localhost**
-
-### 4. (Optional) Local frontend dev with hot reload
+### 3. Launch Development Environment
+Deploy the system locally:
 ```bash
-cd frontend
-npm install
-npm run dev
-# Opens at http://localhost:5173
+docker compose up -d --build
 ```
+Once healthy, access the platform at **[http://localhost:8081](http://localhost:8081)**.
 
 ---
 
-## 🐳 Production Deployment (Docker)
+## 📦 Production Deployment Guide
 
-### Full production stack (Nginx + SSL)
+ToonVault can be deployed on any virtual private server (VPS like DigitalOcean, AWS, Linode, or Coolify environments) easily.
 
+### 1. Set Up Production Compose
+For production, use the `docker-compose.prod.yml` configuration:
 ```bash
-# 1. Set up SSL with Let's Encrypt first
-certbot certonly --standalone -d yourdomain.com -d www.yourdomain.com
-
-# 2. Copy nginx config
-cp nginx/default.conf.example nginx/default.conf
-# Edit nginx/default.conf with your domain
-
-# 3. Set environment variables
-cp .env.example .env
-nano .env  # Fill in all values
-
-# 4. Deploy
 docker compose -f docker-compose.prod.yml up -d --build
-
-# 5. View logs
-docker compose -f docker-compose.prod.yml logs -f
 ```
 
-### Services exposed
-| Service | Port | Purpose |
-|---|---|---|
-| Nginx | 80, 443 | Reverse proxy + SSL |
-| Backend | 5000 (internal) | REST API |
-| Frontend | (internal) | React SPA |
-| MongoDB | (internal) | Story content |
-| PostgreSQL | (internal) | Users/payments |
-| Redis | (internal) | Rankings/sessions |
-
----
-
-## 📁 Project Structure
-
-```
-toonvault/
-├── frontend/                   # React + Vite SPA
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── StoryPage.jsx       # Story detail page with episode list
-│   │   │   ├── MantaReader.jsx     # Full webtoon panel reader
-│   │   │   ├── StoryMap.jsx        # Interactive story quest map
-│   │   │   ├── Home.jsx            # Homepage / browse
-│   │   │   ├── Header.jsx          # Global navigation
-│   │   │   ├── Login.jsx           # Auth page
-│   │   │   └── BecomeCreator.jsx   # Creator onboarding
-│   │   └── App.jsx
-│   └── vite.config.js
-│
-├── backend/                    # Node.js Express API
-│   ├── routes/
-│   │   ├── stories.js              # Story CRUD + AI generation
-│   │   ├── admin.js                # Admin management
-│   │   └── auth.js                 # Authentication
-│   ├── models/
-│   │   ├── Story.js                # MongoDB story schema
-│   │   └── User.js                 # User model
-│   ├── middleware/
-│   │   ├── auth.js                 # JWT middleware
-│   │   └── adminOnly.js            # Admin role guard
-│   ├── generate_professional_story.js  # Manual story generator script
-│   └── server.js
-│
-├── nginx/                      # Nginx config templates
-├── docker-compose.yml          # Development compose
-├── docker-compose.prod.yml     # Production compose
-├── .env.example                # Environment variables template
-└── README.md
-```
-
----
-
-## 🎨 AI Story Generation
-
-ToonVault uses **ToonVault Manhwa Engine v1** to generate professional stories:
-
-### Automatic (via Admin UI or API)
+### 2. Set Up Let's Encrypt SSL Certificates
+Configure Nginx with automatic SSL certificates:
 ```bash
-POST /api/stories/generate
+docker compose exec nginx certbot --nginx -d toonvault.com -d www.toonvault.com
+```
+
+### 3. Mount Volumes
+Ensure your host directories for database storage are mounted correctly:
+- PostgreSQL data: `/data/coolify/applications/toonvault/postgres`
+- Redis data: `/data/coolify/applications/toonvault/redis`
+- MongoDB data: `/data/coolify/applications/toonvault/mongo`
+- Uploads/Images: `/data/coolify/applications/toonvault/uploads`
+
+---
+
+## 🎨 Manual Story Generation (Manhwa Engine v1)
+
+ToonVault has an automated generator utility allowing creators to build a complete manhwa series with episodes in seconds.
+
+### 1. Configure Engine Settings
+Engine config is located at `backend/story_engine.config.json`. Update it to adjust resolution or style defaults:
+```json
 {
-  "topic": "A forbidden romance between a CEO and his employee",
-  "genre": "Romance",
-  "status": "published"
+  "engine": {
+    "name": "ToonVault Manhwa Engine v1",
+    "provider": "Runware AI",
+    "model": "runware:100@1"
+  },
+  "imageSettings": {
+    "width": 704,
+    "height": 1024,
+    "steps": 28,
+    "CFGScale": 7
+  }
 }
 ```
 
-### Manual Script
-Edit `backend/generate_professional_story.js` with your story details, then run:
+### 2. Run the Professional Generator Script
+Edit the storyboard inside `backend/generate_professional_story.js` and execute:
 ```bash
+# Copy generator into running backend container
 docker cp backend/generate_professional_story.js toonvault-backend-1:/app/
+docker cp backend/story_engine.config.json toonvault-backend-1:/app/
+
+# Execute generation
 docker exec toonvault-backend-1 node /app/generate_professional_story.js
 ```
-
-### Engine Settings
-| Setting | Value |
-|---|---|
-| **Model** | `runware:100@1` (FLUX.1) |
-| **Resolution** | 704 × 1024 px |
-| **Steps** | 28 |
-| **CFG Scale** | 7 |
-| **Style** | Korean Manhwa / Webtoon |
-| **Panels/Episode** | 10 |
+The script will output the new **Story ID** and the **Story Reader URL** instantly upon completing.
 
 ---
 
-## 🔌 API Reference
-
-### Stories
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/stories` | Get all stories |
-| `GET` | `/api/stories/:id` | Get story by ID |
-| `POST` | `/api/stories/generate` | AI-generate a story |
-| `POST` | `/api/stories/:id/like` | Like a story |
-| `GET` | `/api/stories/live/ranking` | Get live rankings |
-
-### Auth
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/api/auth/register` | Register user |
-| `POST` | `/api/auth/login` | Login |
-| `GET` | `/api/auth/me` | Get current user |
-
-### Admin (requires admin JWT)
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/admin/stats` | Platform statistics |
-| `GET` | `/api/admin/stories` | All stories |
-| `DELETE` | `/api/admin/stories/:id` | Delete story |
-| `GET` | `/api/admin/users` | All users |
-| `GET` | `/api/admin/settings` | Platform settings |
+## 📖 Seeding the Database
+To populate the database with default interactive stories and quest maps:
+```bash
+docker compose exec backend node seed_stories.js
+```
 
 ---
 
 ## 🔧 Admin Setup
-
-After first launch, register an account and promote it to admin:
-
+Register a user through the UI, then run this command inside the backend container to promote the user to admin status:
 ```bash
-docker exec toonvault-backend-1 node -e "
+docker exec -it toonvault-backend-1 node -e "
 const mongoose = require('mongoose');
 const User = require('./models/User');
 mongoose.connect('mongodb://mongo:27017/toonvault').then(async () => {
   await User.findOneAndUpdate({ email: 'your@email.com' }, { role: 'admin' });
-  console.log('Admin promoted!');
+  console.log('User promoted to Admin successfully!');
   process.exit(0);
 });
 "
@@ -239,41 +190,7 @@ mongoose.connect('mongodb://mongo:27017/toonvault').then(async () => {
 
 ---
 
-## 📸 Screenshots
-
-| Home Page | Story Reader | Story Map |
-|---|---|---|
-| Browse and discover stories | Cinematic panel reader with quote overlays | Interactive episode quest map |
-
----
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch: `git checkout -b feature/amazing-feature`
-3. Commit your changes: `git commit -m 'Add amazing feature'`
-4. Push to the branch: `git push origin feature/amazing-feature`
-5. Open a Pull Request
-
----
-
-## 📄 License
-
-MIT License — see [LICENSE](LICENSE) for details.
-
----
-
-## 🙏 Credits
-
-- **AI Images** — [Runware AI](https://runware.ai/) (FLUX.1 model)
-- **AI Writing** — [Mistral AI](https://mistral.ai/)
-- **UI Icons** — [Lucide React](https://lucide.dev/)
-- **Animations** — [Framer Motion](https://www.framer.com/motion/)
-
----
-
 <div align="center">
-  Made with ❤️ by <a href="https://github.com/StackOrbitAI">StackOrbitAI</a>
-  <br/>
-  <a href="http://toonvault.com/">toonvault.com</a>
+  <h3>Developed with ❤️ by <a href="https://github.com/StackOrbitAI">StackOrbitAI</a></h3>
+  <p><a href="http://toonvault.com/">toonvault.com</a></p>
 </div>

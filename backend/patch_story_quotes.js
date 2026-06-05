@@ -5,7 +5,7 @@ const crypto = require('crypto');
 require('dotenv').config();
 
 const MONGO_URI = 'mongodb://mongo:27017/toonvault';
-const RUNWARE_KEY = "nwRv7EptAzI3C0TrKDWOfAjMqdoRZVl0";
+const RUNWARE_KEY = process.env.RUNWARE_API_KEY || "YOUR_RUNWARE_API_KEY";
 const STORY_ID = "6a22ea4f1dc0500d7f5bc596";
 
 // ─────────────────────────────────────────────────────────────────────────────

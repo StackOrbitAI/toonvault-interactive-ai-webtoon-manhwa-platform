@@ -3,8 +3,8 @@ const axios = require('axios');
 const crypto = require('crypto');
 require('dotenv').config();
 
-const MISTRAL_KEY = process.env.MISTRAL_API_KEY || "VztpyOHj6iS6uF8FKNRvLLxFeG3oS3RR";
-const RUNWARE_KEY = process.env.RUNWARE_API_KEY || "qHl8dL3BSobrD7j52dc2aTMK4E1lRQTy";
+const MISTRAL_KEY = process.env.MISTRAL_API_KEY || "YOUR_MISTRAL_API_KEY";
+const RUNWARE_KEY = process.env.RUNWARE_API_KEY || "YOUR_RUNWARE_API_KEY";
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://mongo:27017/toonvault';
 
 const Story = require('./models/Story');

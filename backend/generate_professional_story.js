@@ -142,8 +142,9 @@ const EPISODES = [
 // ─────────────────────────────────────────────────────────────────────────────
 
 async function generateWithRunware(panels) {
+  const apiKey = process.env.RUNWARE_API_KEY || CONFIG.engine.apiKey;
   const tasks = [
-    { taskType: "authentication", apiKey: CONFIG.engine.apiKey },
+    { taskType: "authentication", apiKey: apiKey },
     ...panels.map(panel => ({
       taskType: "imageInference",
       taskUUID: crypto.randomUUID(),

@@ -1,0 +1,37 @@
+{
+  "_readme": "ToonVault Story Generation Engine — saved settings. Use generate_professional_story.js to create new stories.",
+
+  "engine": {
+    "name": "ToonVault Manhwa Engine v1",
+    "provider": "Runware AI",
+    "model": "runware:100@1",
+    "apiKey": "YOUR_RUNWARE_API_KEY",
+    "apiEndpoint": "https://api.runware.ai/v1"
+  },
+
+  "imageSettings": {
+    "width": 704,
+    "height": 1024,
+    "outputFormat": "WEBP",
+    "steps": 28,
+    "CFGScale": 7,
+    "numberResults": 1,
+    "negativePrompt": "blurry, low quality, distorted, bad anatomy, extra limbs, watermark, text, logo, nsfw, ugly, deformed"
+  },
+
+  "storyDefaults": {
+    "artStyle": "Korean manhwa webtoon style",
+    "basePositivePrompt": "masterpiece, ultra-detailed Korean manhwa webtoon art, beautiful anime aesthetic, official webtoon style, dynamic composition, dramatic cinematic lighting, highly detailed character design, clean linework, vibrant colors",
+    "panelsPerEpisode": 10,
+    "genre": "Romance",
+    "status": "Live",
+    "type": "Comic"
+  },
+
+  "howToGenerate": {
+    "step1": "Edit generate_professional_story.js — change STORY and EPISODES_DATA",
+    "step2": "Run: docker cp generate_professional_story.js toonvault-backend-1:/app/",
+    "step3": "Run: docker exec toonvault-backend-1 node /app/generate_professional_story.js",
+    "step4": "Story URL will be printed at the end"
+  }
+}

@@ -14,14 +14,6 @@ out/
 .env.development.local
 .env.test.local
 .env.production.local
-*.env
-
-# Story engine config (contains API keys)
-backend/story_engine.config.json
-
-# Docker live/prod overrides (may contain secrets)
-docker-compose.live.yml
-docker-compose.override.yml
 
 # Debug logs
 npm-debug.log*
