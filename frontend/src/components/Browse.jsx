@@ -320,7 +320,7 @@ function BrowseCard({ story, view = "grid", index }) {
 
 // ── Main Browse Page ───────────────────────────────────────────────────────
 export default function ToonVaultBrowse() {
-  const [stories, setStories] = useState(RAW_STORIES);
+  const [stories, setStories] = useState([]);
   const [activeGenre, setActiveGenre] = useState("all");
   const [sortBy, setSortBy] = useState("popular");
   const [typeFilter, setTypeFilter] = useState("all");
@@ -368,19 +368,7 @@ export default function ToonVaultBrowse() {
               views: s.views > 1000 ? (s.views / 1000).toFixed(1) + "K" : (s.views || "1.2K")
             };
           });
-          const fallbackCover = "/covers/romance_cover_1777743324375.png";
-          const images = {
-            romance: "/covers/romance_cover_1777743324375.png",
-            fantasy: "/covers/fantasy_cover_1777743338844.png",
-            action: "/covers/action_cover_1777743352958.png",
-            drama: "/covers/drama_cover_1777743372879.png",
-            horror: "/covers/horror_cover_1777743387658.png",
-          };
-          const enhancedRaw = RAW_STORIES.map(s => ({
-            ...s,
-            cover: images[s.genre] || fallbackCover
-          }));
-          setStories([...mapped, ...enhancedRaw]);
+          setStories(mapped);
         }
       })
       .catch(err => console.error("Error fetching stories:", err));
