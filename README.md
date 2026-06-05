@@ -49,7 +49,7 @@ ToonVault is a state-of-the-art interactive manhwa (webtoon) publishing and read
 5. **⚙️ ToonVault AI Manhwa Engine (Fully Automated Story Generation)**
    - **User-Led Story Creation**: Registered users can input a prompt, concept, or simple story idea to automatically build complete, custom branching stories and visual panels utilizing **Runware AI** (FLUX.1 model) and **Mistral AI** text nodes.
    - **Admin Trend Automation**: Integrated trend-research scripts that scrape popular topics and automatically outline, generate, and publish 1 new story weekly.
-   - **Automated Episode Releases**: Automated scheduling system to release 1 new episode daily per active series without manual intervention.
+   - **Automated Episode Releases**: Automated scheduling system to release 1 new episode weekly per active series, establishing a premium weekly release cycle.
    - **Audience-Responsive Storylines**: Feedback analysis algorithm that reviews comments, likes, and active votes to decide plot directions and visual assets of upcoming episodes.
 
 6. **💰 Multi-Channel Monetization & Ads**
