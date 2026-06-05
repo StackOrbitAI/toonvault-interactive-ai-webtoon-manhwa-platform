@@ -242,6 +242,7 @@ export default function StoryPage() {
   const [activeTab, setActiveTab] = useState("episodes"); 
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+  const [recommendations, setRecommendations] = useState([]);
   
   // Feature States
   const [toast, setToast] = useState("");
@@ -356,6 +357,18 @@ export default function StoryPage() {
       .catch(err => {
         console.error("Error fetching story:", err);
         setLoading(false);
+      });
+
+    axios.get('/api/stories')
+      .then(res => {
+        if (Array.isArray(res.data)) {
+          const others = res.data.filter(s => s._id !== id);
+          const shuffled = others.sort(() => 0.5 - Math.random());
+          setRecommendations(shuffled.slice(0, 3));
+        }
+      })
+      .catch(err => {
+        console.error("Error fetching recommended stories:", err);
       });
   }, [id]);
 
@@ -901,23 +914,50 @@ export default function StoryPage() {
                   </AnimatePresence>
 
                   {/* Recommendations Section */}
-                  <section style={{ marginTop: 60 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
-                       <div style={{ width: 4, height: 20, background: COLORS.emerald, borderRadius: 2 }} />
-                       <h3 style={{ margin: 0, fontSize: 20, fontWeight: 700, letterSpacing: -0.5 }}>Seekers Also Read</h3>
-                    </div>
-                    <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap: 16 }}>
-                      {[1, 2, 3].map(i => (
-                        <motion.div key={i} whileHover={{ y: -12 }} style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${COLORS.border}`, borderRadius: 32, padding: "20px", cursor: "pointer" }}>
-                           <div style={{ borderRadius: 20, overflow: "hidden", aspectRatio: "3/4", marginBottom: 20 }}>
-                              <StoryImage src={DEFAULT_COVER} style={{ width: "100%", height: "100%" }} />
-                           </div>
-                           <div style={{ fontWeight: 800, fontSize: 18, color: "#FFF", marginBottom: 8 }}>Ethereal Bound</div>
-                           <div style={{ fontSize: 13, color: COLORS.textMuted, fontWeight: 700 }}>Fantasy • Action</div>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </section>
+                  {recommendations.length > 0 && (
+                    <section style={{ marginTop: 60 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
+                         <div style={{ width: 4, height: 20, background: COLORS.emerald, borderRadius: 2 }} />
+                         <h3 style={{ margin: 0, fontSize: 20, fontWeight: 700, letterSpacing: -0.5 }}>Seekers Also Read</h3>
+                      </div>
+                      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap: 16 }}>
+                        {recommendations.map(rec => {
+                          let cover = rec.coverIcon || "📖";
+                          if (rec.panels && rec.panels.length > 0) {
+                            cover = rec.panels[0];
+                          } else if (cover === "✨" || cover === "📖") {
+                            const genre = String(rec.genre || "").toLowerCase();
+                            if (genre.includes("romance")) cover = "/covers/romance_cover_1777743324375.png";
+                            else if (genre.includes("fantasy")) cover = "/covers/fantasy_cover_1777743338844.png";
+                            else if (genre.includes("action")) cover = "/covers/action_cover_1777743352958.png";
+                            else if (genre.includes("drama")) cover = "/covers/drama_cover_1777743372879.png";
+                            else if (genre.includes("horror")) cover = "/covers/horror_cover_1777743387658.png";
+                            else cover = DEFAULT_COVER;
+                          }
+
+                          return (
+                            <motion.div 
+                              key={rec._id} 
+                              whileHover={{ y: -12 }} 
+                              onClick={() => {
+                                navigate(`/story/${rec._id}`);
+                                window.scrollTo(0, 0);
+                              }}
+                              style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${COLORS.border}`, borderRadius: 32, padding: "20px", cursor: "pointer" }}
+                            >
+                               <div style={{ borderRadius: 20, overflow: "hidden", aspectRatio: "3/4", marginBottom: 20 }}>
+                                  <StoryImage src={cover} style={{ width: "100%", height: "100%" }} />
+                               </div>
+                               <div style={{ fontWeight: 800, fontSize: 18, color: "#FFF", marginBottom: 8 }}>{rec.title}</div>
+                               <div style={{ fontSize: 13, color: COLORS.textMuted, fontWeight: 700 }}>
+                                 {rec.genre ? (rec.genre.charAt(0).toUpperCase() + rec.genre.slice(1)) : "Manhwa"}
+                               </div>
+                            </motion.div>
+                          );
+                        })}
+                      </div>
+                    </section>
+                  )}
                 </div>
 
                 {/* SIDEBAR AREA */}

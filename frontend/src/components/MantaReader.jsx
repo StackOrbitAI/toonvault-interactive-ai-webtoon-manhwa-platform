@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { motion, useScroll, useSpring } from 'framer-motion';
+import { motion, useScroll, useSpring, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Share2, Heart, MessageSquare, BookOpen, Star, MoreVertical, List, ThumbsUp, Flame, ShieldAlert, Bookmark, ArrowRight, Sparkles } from 'lucide-react';
 import axios from 'axios';
 
@@ -275,9 +275,19 @@ export default function MantaReader() {
   const [loading, setLoading] = useState(true);
   const [liked, setLiked] = useState(false);
   const [showUI, setShowUI] = useState(true);
+  const [toast, setToast] = useState(null);
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const epNum = parseInt(queryParams.get('ep')) || 1;
+
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => {
+        setToast(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
@@ -374,6 +384,48 @@ export default function MantaReader() {
 
   return (
     <div style={{ background: COLORS.bg, minHeight: '100vh', color: COLORS.text, fontFamily: "'Inter', sans-serif" }}>
+
+      {/* ═══ TOAST NOTIFICATION ═══ */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 30, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 350, damping: 26 }}
+            style={{
+              position: 'fixed',
+              bottom: 100,
+              left: 0,
+              right: 0,
+              display: 'flex',
+              justifyContent: 'center',
+              zIndex: 9999,
+              pointerEvents: 'none',
+            }}
+          >
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              padding: '14px 24px',
+              background: 'rgba(26, 21, 44, 0.94)',
+              backdropFilter: 'blur(20px)',
+              border: `1px solid ${COLORS.accent}66`,
+              boxShadow: '0 12px 40px rgba(124, 58, 237, 0.35), inset 0 1px 0 rgba(255,255,255,0.1)',
+              borderRadius: 30,
+              color: 'white',
+              fontSize: 14,
+              fontWeight: 800,
+              whiteSpace: 'nowrap',
+              textShadow: '0 1px 2px rgba(0,0,0,0.5)',
+            }}>
+              <Sparkles size={18} color={COLORS.rose} fill={COLORS.rose} />
+              <span>{toast}</span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ═══ MATURE CONTENT MODAL ═══ */}
       {showMatureModal && (
@@ -483,7 +535,7 @@ export default function MantaReader() {
             ].map((choice) => (
               <motion.button
                 key={choice.id}
-                onClick={() => alert(`✨ Storyline Unlocked! You've unlocked Path ${choice.id}.`)}
+                onClick={() => setToast(`✨ Storyline Unlocked! You've unlocked Path ${choice.id}.`)}
                 whileHover={{ y: -8, boxShadow: `0 12px 30px rgba(124, 58, 237, 0.2)` }}
                 whileTap={{ scale: 0.97 }}
                 style={{

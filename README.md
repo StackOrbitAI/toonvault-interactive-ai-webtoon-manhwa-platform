@@ -1,11 +1,11 @@
-# 🌌 ToonVault — Interactive Manhwa Storytelling Platform
+# 🌌 ToonVault — AI-Powered Automated Story Generation Platform
 
 [![Version](https://img.shields.io/badge/version-1.0.0-purple.svg?style=flat-square)](#)
 [![Docker](https://img.shields.io/badge/docker-ready-blue.svg?style=flat-square)](#)
 [![StackOrbitAI](https://img.shields.io/badge/powered%20by-StackOrbitAI-orange.svg?style=flat-square)](https://github.com/StackOrbitAI)
 [![Live URL](https://img.shields.io/badge/live-toonvault.com-emerald.svg?style=flat-square)](http://toonvault.com/)
 
-ToonVault is a state-of-the-art interactive manhwa (webtoon) publishing and reading platform where readers guide the destiny of the characters. Every choice unlocks a custom narrative outcome, live poll trackers, and scroll-triggered vertical comic scroll episodes. Powered by advanced generative AI for visual content and script narrative structure.
+ToonVault is a state-of-the-art interactive manhwa (webtoon) publishing and reading platform where readers guide the destiny of the characters. Every choice unlocks a custom narrative outcome, live poll trackers, and scroll-triggered vertical comic scroll episodes. Powered by advanced generative AI for visual content, automated scheduling, and script narrative structure.
 
 ---
 
@@ -46,9 +46,19 @@ ToonVault is a state-of-the-art interactive manhwa (webtoon) publishing and read
    - Full discussion boards supporting comment likes, creator follows, and nested inline replies.
    - Vault bookmarks letting readers store stories and track current progress.
 
-5. **⚙️ ToonVault Manhwa Engine v1 (AI-Generated Comics)**
-   - Custom generator scripts utilizing **Runware AI** (FLUX.1 model) for vertical webtoon panels.
-   - High-fidelity **Mistral AI** integration for automated story structuring, dialogue, and image prompt generation.
+5. **⚙️ ToonVault AI Manhwa Engine (Fully Automated Story Generation)**
+   - **User-Led Story Creation**: Registered users can input a prompt, concept, or simple story idea to automatically build complete, custom branching stories and visual panels utilizing **Runware AI** (FLUX.1 model) and **Mistral AI** text nodes.
+   - **Admin Trend Automation**: Integrated trend-research scripts that scrape popular topics and automatically outline, generate, and publish 1 new story weekly.
+   - **Automated Episode Releases**: Automated scheduling system to release 1 new episode daily per active series without manual intervention.
+   - **Audience-Responsive Storylines**: Feedback analysis algorithm that reviews comments, likes, and active votes to decide plot directions and visual assets of upcoming episodes.
+
+6. **💰 Multi-Channel Monetization & Ads**
+   - **Dynamic Ad Networks**: Native configuration support for Google AdSense banner widgets, maximizing revenue from free-tier traffic.
+   - **Premium Subscriptions**: Seamless PayPal payment gateway integration offering subscription tiers for ad-free traversal and monthly story-generation credits.
+
+7. **📱 Advanced Automation & Mobile Apps**
+   - **Real-Time WhatsApp Alerts**: n8n workflow integrations sending instant admin updates for user registrations, subscription upgrades, custom twist submissions, and transaction reports.
+   - **iOS & Android Apps**: Native companion shell applications wrapping the mobile-optimized vertical reader experience.
 
 ---
 
