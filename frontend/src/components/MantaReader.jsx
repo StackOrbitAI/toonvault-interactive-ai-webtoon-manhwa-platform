@@ -552,11 +552,11 @@ export default function MantaReader() {
 
       {/* ═══ TOP STICKY NAV (WEBTOON STYLE) ═══ */}
       <header style={{
-        position: 'fixed', top: showUI ? 0 : -66, left: 0, right: 0, zIndex: 1100,
-        height: 64, background: COLORS.header, backdropFilter: 'blur(20px)',
+        position: 'fixed', top: showUI ? 0 : -100, left: 0, right: 0, zIndex: 1100,
+        minHeight: 64, background: COLORS.header, backdropFilter: 'blur(20px)',
         borderBottom: `1px solid ${COLORS.border}`,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 24px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap',
+        padding: isMobile ? '10px 16px' : '0 24px', gap: isMobile ? 12 : 0,
         transition: 'top 0.3s cubic-bezier(0.1, 0.76, 0.55, 0.94)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
@@ -576,18 +576,17 @@ export default function MantaReader() {
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 8 : 12, flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 8 : 12, flexShrink: 0, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
           <button 
             onClick={() => navigate(`/reel/${storyId}?ep=${epNum}`)}
             style={{ 
               background: `linear-gradient(135deg, ${COLORS.accent}, ${COLORS.rose})`, 
-              border: 'none', color: 'white', padding: isMobile ? '6px 10px' : '6px 14px', borderRadius: 12, 
+              border: 'none', color: 'white', padding: '6px 10px', borderRadius: 12, 
               cursor: 'pointer', fontSize: 13, fontWeight: 800, display: 'flex', 
-              alignItems: 'center', gap: 6, boxShadow: '0 4px 12px rgba(124,58,237,0.3)',
-              whiteSpace: 'nowrap'
+              alignItems: 'center', gap: 6, boxShadow: '0 4px 12px rgba(124,58,237,0.3)'
             }}
           >
-            <Play size={14} fill="currentColor" /> <span className="desktop-only">Watch as Reel</span>
+            <Play size={14} fill="currentColor" /> Watch as Reel
           </button>
           
           <button 
@@ -597,33 +596,31 @@ export default function MantaReader() {
             {isBgmPlaying ? <Volume2 size={isMobile ? 18 : 20} /> : <VolumeX size={isMobile ? 18 : 20} />}
           </button>
           
-          {!isMobile && (
-            <>
-              <select 
-                value={targetLanguage} 
-                onChange={(e) => handleTranslate(e.target.value)}
-                disabled={isTranslating}
-                style={{ 
-                  background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', 
-                  padding: '6px 12px', borderRadius: 12, cursor: 'pointer',
-                  fontSize: 13, fontWeight: 700, outline: 'none', appearance: 'none',
-                  opacity: isTranslating ? 0.5 : 1
-                }}
-              >
-                <option value="English" style={{ color: 'black' }}>EN</option>
-                <option value="Hindi" style={{ color: 'black' }}>HI</option>
-                <option value="Spanish" style={{ color: 'black' }}>ES</option>
-                <option value="Japanese" style={{ color: 'black' }}>JA</option>
-                <option value="Korean" style={{ color: 'black' }}>KO</option>
-                <option value="French" style={{ color: 'black' }}>FR</option>
-              </select>
-              <button style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: 'white', width: 40, height: 40, borderRadius: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Share2 size={20} />
-              </button>
-            </>
-          )}
-          <button onClick={() => navigate(`/story/${storyId}`)} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: 'white', width: 40, height: 40, borderRadius: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <List size={20} />
+          <select 
+            value={targetLanguage} 
+            onChange={(e) => handleTranslate(e.target.value)}
+            disabled={isTranslating}
+            style={{ 
+              background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', 
+              padding: '6px 12px', borderRadius: 12, cursor: 'pointer',
+              fontSize: 13, fontWeight: 700, outline: 'none', appearance: 'none',
+              opacity: isTranslating ? 0.5 : 1
+            }}
+          >
+            <option value="English" style={{ color: 'black' }}>EN</option>
+            <option value="Hindi" style={{ color: 'black' }}>HI</option>
+            <option value="Spanish" style={{ color: 'black' }}>ES</option>
+            <option value="Japanese" style={{ color: 'black' }}>JA</option>
+            <option value="Korean" style={{ color: 'black' }}>KO</option>
+            <option value="French" style={{ color: 'black' }}>FR</option>
+          </select>
+          
+          <button style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: 'white', width: isMobile ? 36 : 40, height: isMobile ? 36 : 40, borderRadius: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Share2 size={isMobile ? 18 : 20} />
+          </button>
+          
+          <button onClick={() => navigate(`/story/${storyId}`)} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: 'white', width: isMobile ? 36 : 40, height: isMobile ? 36 : 40, borderRadius: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <List size={isMobile ? 18 : 20} />
           </button>
         </div>
       </header>

@@ -352,10 +352,6 @@ export default function StoryPage() {
     axios.get(`/api/stories/${id}`)
       .then(res => {
         setStory(res.data);
-        if ((res.data.isAdult || res.data.isAgeRestricted) && !sessionStorage.getItem(`ageVerified_${id}`)) {
-          setPendingChoice({ type: 'PAGE_LOAD' });
-          setShowAgeGate(true);
-        }
         setLoading(false);
       })
       .catch(err => {
@@ -375,6 +371,15 @@ export default function StoryPage() {
         console.error("Error fetching recommended stories:", err);
       });
   }, [id]);
+
+  useEffect(() => {
+    if (story) {
+      const isMature = story.isAgeRestricted || story.isAdult || story.genre?.toLowerCase() === 'mature';
+      if (isMature && localStorage.getItem('ageConfirmed') !== 'true') {
+        setShowAgeGate(true);
+      }
+    }
+  }, [story]);
 
   useEffect(() => {
     if (viewMode !== "reader") return;
@@ -457,11 +462,11 @@ export default function StoryPage() {
       {/* Dynamic Modals */}
       <AnimatePresence>
         {showAgeGate && <AgeGateModal rating="18+" onConsent={() => { 
+          localStorage.setItem('ageConfirmed', 'true');
           setShowAgeGate(false); 
-          sessionStorage.setItem(`ageVerified_${id}`, 'true');
           if(pendingChoice?.type === 'EPISODE') {
               navigate(`/manta/${id}?ep=${pendingChoice.episode.number || 1}`);
-          } else if(pendingChoice?.type !== 'PAGE_LOAD' && pendingChoice) {
+          } else if(pendingChoice) {
               executeChoice(pendingChoice); 
           }
         }} onDecline={() => {
