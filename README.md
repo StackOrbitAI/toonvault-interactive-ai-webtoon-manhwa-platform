@@ -191,7 +191,9 @@ This is the core of ToonVault. The entire content lifecycle is automated:
 
 ### 5. ⚙️ AI Manhwa Engine v1 (Story + Episode Generation)
 - **For Users**: Enter a story idea → AI generates complete story with panels
-- **For Admins**: Automated weekly new story creation from trend data
+- **Smart Title Suggestions**: AI auto-generates 3 captivating title ideas based on your prompt
+- **Publish & Draft Workflow**: Choose whether to publish live instantly (with public URL) or save as a draft
+- **Next Episode Generation**: Direct "Next Ep" button from your dashboard to instantly branch or continue the narrative
 - **Engine**: Runware AI FLUX.1 model + Mistral AI for scripting
 - **Quality**: 704×1024px panels, 28 steps, CFG Scale 7
 
