@@ -496,9 +496,9 @@ export default function StoryPage() {
                 <button onClick={() => setViewMode("dashboard")} style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${COLORS.border}`, color: "#FFF", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, padding: "10px 20px", borderRadius: 14, fontWeight: 800, transition: "all 0.2s" }}>
                   <ArrowLeft size={18} /> <span className="desktop-only">Back to Deck</span>
                 </button>
-                <div style={{ textAlign: "center" }}>
-                  <div style={{ fontSize: 13, fontWeight: 900, color: COLORS.purple, textTransform: "uppercase", letterSpacing: 1.5 }}>{story.title}</div>
-                  <div style={{ fontSize: 11, color: COLORS.textMuted, fontWeight: 600, marginTop: 4 }}>{activeEpisode?.title} {activeScene ? `✦ ${activeScene.title}` : ""}</div>
+                <div style={{ textAlign: "center", flex: 1, minWidth: 0, padding: "0 10px" }}>
+                  <div style={{ fontSize: 13, fontWeight: 900, color: COLORS.purple, textTransform: "uppercase", letterSpacing: 1.5, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{story.title}</div>
+                  <div style={{ fontSize: 11, color: COLORS.textMuted, fontWeight: 600, marginTop: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{activeEpisode?.title} {activeScene ? `✦ ${activeScene.title}` : ""}</div>
                 </div>
                 <div style={{ width: 100, display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 10 }}>
                   <span style={{ fontSize: 12, fontWeight: 900, color: COLORS.purple }}>{Math.round(scrollProgress)}%</span>
@@ -754,7 +754,7 @@ export default function StoryPage() {
                                   
                                   <div style={{ flex: 1 }}>
                                     <div style={{ fontWeight: 700, fontSize: 16, color: "#FFF", marginBottom: 4 }}>{ep.title}</div>
-                                    <div style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 12, color: COLORS.textMuted, fontWeight: 500 }}>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 12, color: COLORS.textMuted, fontWeight: 500, flexWrap: "wrap" }}>
                                        <div style={{ display: "flex", alignItems: "center", gap: 4 }}><Layers size={14} /> {ep.scenes?.length || 0} Scenes</div>
                                        <div style={{ display: "flex", alignItems: "center", gap: 4 }}><Clock size={14} /> 8 min</div>
                                        <div style={{ display: "flex", alignItems: "center", gap: 4 }}><ThumbsUp size={14} /> {(story.views / 10).toFixed(0)}</div>

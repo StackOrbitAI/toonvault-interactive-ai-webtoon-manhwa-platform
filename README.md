@@ -414,8 +414,8 @@ docker compose exec backend node seed_stories.js
 | Feature | Status |
 |---------|--------|
 | AI Story Generation (Mistral + Runware) | ✅ Live |
-| Weekly Automated Story Releases | ✅ Ready |
-| Weekly Automated Episode Releases | ✅ Ready |
+| Weekly Automated Story Releases | ✅ Live |
+| Weekly Automated Episode Releases | ✅ Live |
 | Branching Choice System (A/B/C/D) | ✅ Live |
 | Live Fan Vote Tracker | ✅ Live |
 | Creator Follow System | ✅ Live |
@@ -426,7 +426,7 @@ docker compose exec backend node seed_stories.js
 | n8n WhatsApp Admin Alerts | 📅 Planned |
 | iOS Native App | 📅 Planned |
 | Android Native App | 📅 Planned |
-| Community Feedback → AI Episode Shaping | 📅 Planned |
+| Community Feedback → AI Episode Shaping | ✅ Live |
 | Trending Topic Auto-Detection | 📅 Planned |
 
 ---
