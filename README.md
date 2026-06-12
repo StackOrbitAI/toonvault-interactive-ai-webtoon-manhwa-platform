@@ -448,7 +448,6 @@ Built with ❤️ by [StackOrbitAI](https://github.com/StackOrbitAI)
 ## 🤝 Hire Our Team
 If you need help setting up workflows, automations, or custom solutions, our expert team is available for hire!
 
-- 💼 **Fiverr Profile:** [Hire us on Fiverr](https://www.fiverr.com/s/EgGm8pq)
 - 💼 **Upwork Profile:** [Hire us on Upwork](https://www.upwork.com/freelancers/~01b7bb1733953e942f)
 
 ---
